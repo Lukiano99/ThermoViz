@@ -22,18 +22,18 @@ export default function VerifyView() {
       <EmailInboxIcon sx={{ mb: 5, height: 96 }} />
 
       <Typography variant="h3" sx={{ mb: 1 }}>
-        Please check your email!
+        Proveri svoj email!
       </Typography>
 
       <Stack
         spacing={1}
         sx={{ color: "text.secondary", typography: "body2", mb: 5 }}
       >
-        <Box component="span"> We have sent a confirmation link to</Box>
+        <Box component="span"> Poslali smo ti potvrdni link na email</Box>
         <Box component="strong" sx={{ color: "text.primary" }}>
           {email}
         </Box>
-        <Box component="div">Please check your inbox/spam.</Box>
+        <Box component="div">Proveri svoj inbox/spam</Box>
       </Stack>
     </>
   );
@@ -51,7 +51,7 @@ export default function VerifyView() {
         startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
         sx={{ alignSelf: "center" }}
       >
-        Return to Sign in
+        Vrati se na prijavu
       </Button>
     </>
   );
