@@ -3,7 +3,7 @@ import { LoginView } from "src/sections/auth";
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: "Login",
+  title: "Prijava",
 };
 
 export default function LoginPage() {

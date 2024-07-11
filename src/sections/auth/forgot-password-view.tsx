@@ -24,8 +24,8 @@ export default function ForgotPasswordView() {
 
   const ForgotPasswordSchema = Yup.object().shape({
     email: Yup.string()
-      .required("Email is required")
-      .email("Email must be a valid email address"),
+      .required("Email je obavezno polje")
+      .email("Email mora da bude validna email adresa"),
   });
 
   const defaultValues = {
@@ -60,7 +60,7 @@ export default function ForgotPasswordView() {
 
   const renderForm = (
     <Stack spacing={3} alignItems="center">
-      <RHFTextField name="email" label="Email address" />
+      <RHFTextField name="email" label="Email adresa" />
 
       <LoadingButton
         fullWidth
@@ -69,7 +69,7 @@ export default function ForgotPasswordView() {
         variant="contained"
         loading={isSubmitting}
       >
-        Send Request
+        Pošalji zahtev
       </LoadingButton>
 
       <Link
@@ -83,7 +83,7 @@ export default function ForgotPasswordView() {
         }}
       >
         <Iconify icon="eva:arrow-ios-back-fill" width={16} />
-        Return to sign in
+        Vrati se na prijavu
       </Link>
     </Stack>
   );
@@ -93,11 +93,11 @@ export default function ForgotPasswordView() {
       <PasswordIcon sx={{ height: 96 }} />
 
       <Stack spacing={1} sx={{ mt: 3, mb: 5 }}>
-        <Typography variant="h3">Forgot your password?</Typography>
+        <Typography variant="h3">Zaboravio/la si lozinku?</Typography>
 
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          Please enter the email address associated with your account and We
-          will email you a link to reset your password.
+          Unesi email adresu povezanu sa tvojim nalogom i mi ćemo ti poslati
+          link za resetovanje lozinke na email.
         </Typography>
       </Stack>
     </>

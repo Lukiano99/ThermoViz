@@ -31,11 +31,11 @@ export default function NewPasswordView() {
 
   const NewPasswordSchema = Yup.object().shape({
     password: Yup.string()
-      .min(6, "Password must be at least 6 characters")
-      .required("Password is required"),
+      .min(6, "Lozinka mora da sadrzi najmanje 6 karaktera")
+      .required("Lozinka je obavezno polje"),
     confirmPassword: Yup.string()
-      .required("Confirm password is required")
-      .oneOf([Yup.ref("password")], "Passwords must match"),
+      .required("Potvrda lozinke je obavezno polje")
+      .oneOf([Yup.ref("password")], "Lozinke moraju da se poklapaju"),
   });
 
   const defaultValues = {
@@ -75,10 +75,10 @@ export default function NewPasswordView() {
       <NewPasswordIcon sx={{ height: 96 }} />
 
       <Stack spacing={1} sx={{ mt: 3, mb: 5 }}>
-        <Typography variant="h3">New Password</Typography>
+        <Typography variant="h3">Nova Lozinka</Typography>
 
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          Successful updates enable access using the new password
+          Uspešno ažuriranje omogućava pristup pomoću nove lozinke
         </Typography>
       </Stack>
     </>
@@ -88,7 +88,7 @@ export default function NewPasswordView() {
     <Stack spacing={3}>
       <RHFTextField
         name="password"
-        label="Confirm Password"
+        label="Nova Lozinka"
         type={password.value ? "text" : "password"}
         InputProps={{
           endAdornment: (
@@ -107,7 +107,7 @@ export default function NewPasswordView() {
 
       <RHFTextField
         name="confirmPassword"
-        label="Password"
+        label="Potvrda Nove Lozinke"
         type={password.value ? "text" : "password"}
         InputProps={{
           endAdornment: (
@@ -131,7 +131,7 @@ export default function NewPasswordView() {
         variant="contained"
         loading={isSubmitting}
       >
-        Update Password
+        Azuriraj Lozinku
       </LoadingButton>
     </Stack>
   );

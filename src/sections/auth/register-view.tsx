@@ -31,12 +31,12 @@ export default function RegisterView() {
   const password = useBoolean();
 
   const RegisterSchema = Yup.object().shape({
-    firstName: Yup.string().required("First name required"),
-    lastName: Yup.string().required("Last name required"),
+    firstName: Yup.string().required("Ime je obavezno polje"),
+    lastName: Yup.string().required("Prezime je obavezno polje"),
     email: Yup.string()
-      .required("Email is required")
-      .email("Email must be a valid email address"),
-    password: Yup.string().required("Password is required"),
+      .required("Email je obavezano polje")
+      .email("Email mora da bude validna email adresa"),
+    password: Yup.string().required("Lozinka je obavezno polje"),
   });
 
   const defaultValues = {
@@ -84,17 +84,17 @@ export default function RegisterView() {
 
   const renderHead = (
     <Stack spacing={2} sx={{ mb: 5, position: "relative" }}>
-      <Typography variant="h4">Get started absolutely free</Typography>
+      <Typography variant="h4">Registruj se apsolutno besplatno</Typography>
 
       <Stack direction="row" spacing={0.5}>
-        <Typography variant="body2"> Already have an account? </Typography>
+        <Typography variant="body2"> Vec imas nalog? </Typography>
 
         <Link
           href={paths.auth.login}
           component={RouterLink}
           variant="subtitle2"
         >
-          Sign in
+          Prijavi se
         </Link>
       </Stack>
     </Stack>
@@ -110,13 +110,13 @@ export default function RegisterView() {
         color: "text.secondary",
       }}
     >
-      {"By signing up, I agree to "}
+      {"Prijavom prihvatam "}
       <Link underline="always" color="text.primary">
-        Terms of Service
+        Uslovi korišćenja
       </Link>
-      {" and "}
+      {" i "}
       <Link underline="always" color="text.primary">
-        Privacy Policy
+        Politika o privatnosti
       </Link>
       .
     </Typography>
@@ -125,15 +125,15 @@ export default function RegisterView() {
   const renderForm = (
     <Stack spacing={2.5}>
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-        <RHFTextField name="firstName" label="First name" />
-        <RHFTextField name="lastName" label="Last name" />
+        <RHFTextField name="firstName" label="Ime" />
+        <RHFTextField name="lastName" label="Prezime" />
       </Stack>
 
-      <RHFTextField name="email" label="Email address" />
+      <RHFTextField name="email" label="Email adresa" />
 
       <RHFTextField
         name="password"
-        label="Password"
+        label="Lozinka"
         type={password.value ? "text" : "password"}
         InputProps={{
           endAdornment: (
@@ -158,7 +158,7 @@ export default function RegisterView() {
         variant="contained"
         loading={isSubmitting}
       >
-        Create account
+        Napravi nalog
       </LoadingButton>
     </Stack>
   );
