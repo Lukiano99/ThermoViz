@@ -40,6 +40,15 @@ const ICONS = {
   ecommerce: icon("ic_ecommerce"),
   analytics: icon("ic_analytics"),
   dashboard: icon("ic_dashboard"),
+  chart: icon("ic_chart"),
+  temperature: icon("ic_temperature"),
+  energy: icon("ic_energy"),
+  consumption: icon("ic_consumption"),
+  location: icon("ic_location"),
+  settings: icon("ic_settings"),
+  report: icon("ic_report"),
+  notification: icon("ic_notification"),
+  help: icon("ic_help"),
 };
 
 // ----------------------------------------------------------------------
@@ -52,37 +61,111 @@ export function useNavData() {
       {
         subheader: "home",
         items: [
-          { title: "home", path: paths.dashboard.root, icon: ICONS.dashboard },
           {
-            title: "events",
-            path: paths.dashboard.root + "/events",
-            icon: ICONS.ecommerce,
+            title: "dashboard",
+            path: paths.dashboard.root,
+            icon: ICONS.dashboard,
+          },
+        ],
+      },
+      // ANALYSIS
+      // ----------------------------------------------------------------------
+      {
+        subheader: "data analysis",
+        items: [
+          {
+            title: "Analytics",
+            path: paths.data_analysis.analytics,
+            icon: ICONS.analytics,
           },
           {
-            title: "organizations",
-            path: paths.dashboard.root + "/orgs",
-            icon: ICONS.booking,
+            title: "Graphs",
+            path: paths.data_analysis.graphs,
+            icon: ICONS.chart,
+          },
+          {
+            title: "Temperature Trends",
+            path: paths.data_analysis.temperature_trends,
+            icon: ICONS.temperature,
+          },
+          {
+            title: "Energy Trends",
+            path: paths.data_analysis.energy_trends,
+            icon: ICONS.energy,
           },
         ],
       },
 
-      // MANAGEMENT
+      // ENERGY_MANAGEMENT
       // ----------------------------------------------------------------------
       {
-        subheader: "management",
+        subheader: "energy management",
         items: [
           {
-            title: "user",
-            path: paths.dashboard.group.root,
-            icon: ICONS.user,
-            children: [
-              { title: "four", path: paths.dashboard.group.root },
-              { title: "five", path: paths.dashboard.group.five },
-              { title: "six", path: paths.dashboard.group.six },
-            ],
+            title: "consumption",
+            path: paths.energy_management.consumption,
+            icon: ICONS.consumption,
+          },
+          {
+            title: "locations",
+            path: paths.energy_management.locations,
+            icon: ICONS.location,
           },
         ],
       },
+
+      // ADMINISTRATION
+      // ----------------------------------------------------------------------
+      {
+        subheader: "administration",
+        items: [
+          {
+            title: "settings",
+            path: paths.administration.settings,
+            icon: ICONS.settings,
+          },
+          {
+            title: "reports",
+            path: paths.administration.reports,
+            icon: ICONS.report,
+          },
+          {
+            title: "notifications",
+            path: paths.administration.notifications,
+            icon: ICONS.notification,
+          },
+        ],
+      },
+      // SUPPORT
+      // ----------------------------------------------------------------------
+      {
+        subheader: "support",
+        items: [
+          {
+            title: "help",
+            path: paths.support.help,
+            icon: ICONS.help,
+          },
+        ],
+      },
+
+      // // MANAGEMENT
+      // // ----------------------------------------------------------------------
+      // {
+      //   subheader: "management",
+      //   items: [
+      //     {
+      //       title: "user",
+      //       path: paths.dashboard.group.root,
+      //       icon: ICONS.user,
+      //       children: [
+      //         { title: "four", path: paths.dashboard.group.root },
+      //         { title: "five", path: paths.dashboard.group.five },
+      //         { title: "six", path: paths.dashboard.group.six },
+      //       ],
+      //     },
+      //   ],
+      // },
     ],
     [],
   );
