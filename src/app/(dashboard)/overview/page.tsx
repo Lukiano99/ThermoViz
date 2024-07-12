@@ -3,7 +3,7 @@ import OneView from "src/sections/one/view";
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: "Dashboard: One",
+  title: "ThermoViz: Overview",
 };
 
 export default function Page() {

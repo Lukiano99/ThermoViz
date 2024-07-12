@@ -6,14 +6,14 @@ import { alpha } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import { useSettingsContext } from "src/components/settings";
 
-import { api } from "@/trpc/react";
+// import { api } from "@/trpc/react";
 
 // ----------------------------------------------------------------------
 
 export default function OneView() {
   const settings = useSettingsContext();
 
-  const { data: measurements } = api.measurement.getRecent.useQuery();
+  // const { data: measurements } = api.measurement.getRecent.useQuery();
 
   return (
     <Container maxWidth={settings.themeStretch ? false : "xl"}>
@@ -32,11 +32,11 @@ export default function OneView() {
           border: (theme) => `dashed 1px ${theme.palette.divider}`,
         }}
       >
-        {measurements?.map((measurement, idx) => (
+        {/* {measurements?.map((measurement, idx) => (
           <Typography key={idx} variant="body2" sx={{ maxWidth: "100px" }}>
             {measurement.location}
           </Typography>
-        ))}
+        ))} */}
       </Box>
     </Container>
   );
