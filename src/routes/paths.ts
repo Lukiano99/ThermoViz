@@ -2,8 +2,8 @@
 
 const ROOTS = {
   AUTH: "/auth",
-  DASHBOARD: "/dashboard",
-  DATA_ANALYSIS: "/data_analysis",
+  OVERVIEW: "/overview",
+  DATA_ANALYSIS: "/data-analysis",
   ENERGY_MANAGEMENT: "/energy-management",
   ADMINISTRATION: "/administration",
   SUPPORT: "/support",
@@ -22,15 +22,15 @@ export const paths = {
     forgotPassword: `${ROOTS.AUTH}/forgot-password`,
   },
   // DASHBOARD
-  dashboard: {
-    root: ROOTS.DASHBOARD,
-    one: `${ROOTS.DASHBOARD}/one`,
-    two: `${ROOTS.DASHBOARD}/two`,
-    three: `${ROOTS.DASHBOARD}/three`,
+  overview: {
+    root: ROOTS.OVERVIEW,
+    one: `${ROOTS.OVERVIEW}/one`,
+    two: `${ROOTS.OVERVIEW}/two`,
+    three: `${ROOTS.OVERVIEW}/three`,
     group: {
-      root: `${ROOTS.DASHBOARD}/group`,
-      five: `${ROOTS.DASHBOARD}/group/five`,
-      six: `${ROOTS.DASHBOARD}/group/six`,
+      root: `${ROOTS.OVERVIEW}/group`,
+      five: `${ROOTS.OVERVIEW}/group/five`,
+      six: `${ROOTS.OVERVIEW}/group/six`,
     },
   },
   // DATA_ANALYSIS
@@ -38,8 +38,8 @@ export const paths = {
     root: ROOTS.DATA_ANALYSIS,
     analytics: `${ROOTS.DATA_ANALYSIS}/analytics`,
     graphs: `${ROOTS.DATA_ANALYSIS}/graphs`,
-    temperature_trends: `${ROOTS.DATA_ANALYSIS}/temperatureTrends`,
-    energy_trends: `${ROOTS.DATA_ANALYSIS}/energyTrends`,
+    temperature_trends: `${ROOTS.DATA_ANALYSIS}/temperature-trends`,
+    energy_trends: `${ROOTS.DATA_ANALYSIS}/energy-trends`,
   },
   // ENERGY_MANAGEMENT
   energy_management: {
