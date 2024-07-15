@@ -1,8 +1,15 @@
-import { startOfDay, subDays } from "date-fns";
+import { TRPCError } from "@trpc/server";
+import { format, startOfDay, subDays } from "date-fns";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-
+type EnergyPerDay = {
+  date: string;
+  total_energy: number;
+};
+type RecordCounts = {
+  distinct_dates_count: number;
+};
 export const measurementRouter = createTRPCRouter({
   // Vraća sve merenja
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -160,53 +167,105 @@ export const measurementRouter = createTRPCRouter({
       },
     });
   }),
-  totalEnergyLast7Days: protectedProcedure.query(async ({ ctx }) => {
-    // const today = startOfDay(new Date());
-    const today = startOfDay(new Date(2024, 4, 24));
-    const sevenDaysAgo = subDays(today, 7);
-    const fourteenDaysAgo = subDays(today, 14);
+  totalEnergyLastNDays: protectedProcedure
+    .input(z.object({ days: z.number().positive() })) // Input validation
+    .query(async ({ input, ctx }) => {
+      const { days } = input;
+      // const today = startOfDay(new Date());
+      const today = startOfDay(new Date(2024, 4, 20));
+      const nDaysAgo = subDays(today, days);
+      const nDaysBeforeThat = subDays(today, 2 * days);
 
-    // Energy for the last 7 days
-    const last7DaysEnergy = await ctx.db.measurement.aggregate({
-      _sum: {
-        e: true,
-      },
-      where: {
-        datetime: {
-          gte: sevenDaysAgo,
-          lt: today,
+      const distinctDatesCount = await ctx.db.$queryRaw<RecordCounts[]>`
+      SELECT COUNT(DISTINCT DATE_TRUNC('day', datetime)) AS distinct_dates_count
+      FROM "Measurement"
+      WHERE datetime >= ${nDaysAgo} AND datetime < ${today};
+    `;
+      console.log(distinctDatesCount);
+      // if (distinctDatesCount < input.days) {
+      //   throw new TRPCError({
+      //     code: "NOT_FOUND",
+      //     message: `Data for some days in the last ${days} days is missing.`,
+      //   });
+      // }
+      // Energy for the last N days
+      const lastNDaysEnergy = await ctx.db.measurement.aggregate({
+        _sum: {
+          e: true,
         },
-      },
-    });
-
-    // Energy for the previous 7 days
-    const previous7DaysEnergy = await ctx.db.measurement.aggregate({
-      _sum: {
-        e: true,
-      },
-      where: {
-        datetime: {
-          gte: fourteenDaysAgo,
-          lt: sevenDaysAgo,
+        where: {
+          datetime: {
+            gte: nDaysAgo,
+            lt: today,
+          },
         },
-      },
-    });
+      });
 
-    let last7DaysTotal: number = last7DaysEnergy._sum.e ?? 0;
-    const previous7DaysTotal: number = previous7DaysEnergy._sum.e ?? 0;
+      // Energy for the previous N days
+      const previousNDaysEnergy = await ctx.db.measurement.aggregate({
+        _sum: {
+          e: true,
+        },
+        where: {
+          datetime: {
+            gte: nDaysBeforeThat,
+            lt: nDaysAgo,
+          },
+        },
+      });
 
-    // Calculate the percentage difference
-    let percentageDifference = 0;
-    if (previous7DaysTotal !== 0) {
-      percentageDifference =
-        ((last7DaysTotal - previous7DaysTotal) / previous7DaysTotal) * 100;
-    }
+      let lastNDaysTotal: number = lastNDaysEnergy._sum.e ?? 0;
+      const previousNDaysTotal = previousNDaysEnergy._sum.e ?? 0;
 
-    last7DaysTotal = last7DaysTotal / 1000;
+      // Calculate the percentage difference
+      let percentageDifference = 0;
+      if (previousNDaysTotal !== 0) {
+        percentageDifference =
+          ((lastNDaysTotal - previousNDaysTotal) / previousNDaysTotal) * 100;
+      }
+      lastNDaysTotal = lastNDaysTotal / 1000;
+      return {
+        totalEnergyLastNDays: lastNDaysTotal,
+        percentageDifference: percentageDifference,
+      };
+    }),
 
-    return {
-      totalEnergyLast7Days: last7DaysTotal,
-      percentageDifference: percentageDifference,
-    };
-  }),
+  energyConsumptionByDays: protectedProcedure
+    .input(z.object({ days: z.number().positive() })) // Input validation
+    .query(async ({ ctx, input }) => {
+      const { days } = input;
+      // const today = startOfDay(new Date());
+      const today = startOfDay(new Date(2024, 4, 24));
+
+      const startDate = format(subDays(today, days), "yyyy-MM-dd"); // Subtrahujemo 1 jer uključujemo i danas
+      const endDate = format(today, "yyyy-MM-dd"); // Kraj intervala (danas)
+
+      console.log({ startDate });
+      console.log({ endDate });
+
+      // Upit za računanje potrošnje energije po danima
+      const results: EnergyPerDay[] = await ctx.db.$queryRawUnsafe<
+        EnergyPerDay[]
+      >(`
+        SELECT DATE(datetime) as date, SUM(e) as total_energy
+        FROM "Measurement"
+        WHERE datetime >=  '${startDate}' AND datetime <= '${endDate}'
+        GROUP BY DATE(datetime)
+        ORDER BY date ASC;
+        `);
+
+      console.log({ results });
+
+      if (!results) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Data for some days in the last ${days} days is missing.`,
+        });
+      }
+
+      const totalEnergies = results.map(
+        (result: EnergyPerDay) => result.total_energy ?? 0,
+      );
+      return totalEnergies;
+    }),
 });
