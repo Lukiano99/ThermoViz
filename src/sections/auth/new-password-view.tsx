@@ -59,7 +59,7 @@ export default function NewPasswordView() {
     try {
       await updatePassword?.(data.password);
 
-      router.push(paths.dashboard.root);
+      router.push(paths.overview.root);
     } catch (error) {
       console.error(error);
       reset();

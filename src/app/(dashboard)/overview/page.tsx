@@ -1,11 +1,11 @@
-import FiveView from "src/sections/five/view";
+import HomeOverviewView from "@/sections/home/overview/view/view";
 
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: "Dashboard: Five",
+  title: "ThermoViz: Overview",
 };
 
 export default function Page() {
-  return <FiveView />;
+  return <HomeOverviewView />;
 }

@@ -62,13 +62,13 @@ export function useNavData() {
         subheader: "home",
         items: [
           {
-            title: "dashboard",
-            path: paths.dashboard.root,
+            title: "overview",
+            path: paths.overview.root,
             icon: ICONS.dashboard,
           },
         ],
       },
-      // ANALYSIS
+      // DATA ANALYSIS
       // ----------------------------------------------------------------------
       {
         subheader: "data analysis",

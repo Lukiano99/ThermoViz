@@ -1,11 +1,11 @@
-import TwoView from "src/sections/two/view";
+import OneView from "src/sections/one/view";
 
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: "Dashboard: Two",
+  title: "Dashboard: One",
 };
 
 export default function Page() {
-  return <TwoView />;
+  return <OneView />;
 }

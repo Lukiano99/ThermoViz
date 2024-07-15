@@ -183,7 +183,7 @@ export function AuthProvider({ children }: Props) {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}${paths.dashboard.root}`,
+          emailRedirectTo: `${window.location.origin}${paths.overview.root}`,
           data: {
             display_name: `${firstName} ${lastName}`,
           },
