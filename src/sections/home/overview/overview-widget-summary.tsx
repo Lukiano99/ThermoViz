@@ -1,8 +1,6 @@
 import Box from "@mui/material/Box";
 import Card, { type CardProps } from "@mui/material/Card";
-import Stack from "@mui/material/Stack";
 import { useTheme } from "@mui/material/styles";
-import Typography from "@mui/material/Typography";
 import { type ApexOptions } from "apexcharts";
 import Chart from "src/components/chart";
 import Iconify from "src/components/iconify";
@@ -14,6 +12,7 @@ interface Props extends CardProps {
   title: string;
   total: number;
   percent: number;
+  UOM?: string;
   chart: {
     colors?: string[];
     series: number[];
@@ -24,6 +23,7 @@ interface Props extends CardProps {
 export default function OverviewWidgetSummary({
   title,
   percent,
+  UOM,
   total,
   chart,
   sx,
@@ -72,39 +72,57 @@ export default function OverviewWidgetSummary({
     ...options,
   };
 
+  const renderTrending = (
+    <Box sx={{ gap: 0.5, display: "flex", alignItems: "center" }}>
+      <Iconify
+        width={24}
+        icon={
+          percent < 0
+            ? "solar:double-alt-arrow-down-bold-duotone"
+            : "solar:double-alt-arrow-up-bold-duotone"
+        }
+        sx={{
+          flexShrink: 0,
+          color: "success.main",
+          ...(percent < 0 && { color: "error.main" }),
+        }}
+      />
+
+      <Box component="span" sx={{ typography: "subtitle2" }}>
+        {percent > 0 && "+"}
+        {fPercent(percent)}
+      </Box>
+      <Box
+        component="span"
+        sx={{ typography: "body2", color: "text.secondary" }}
+      >
+        last 7 days
+      </Box>
+    </Box>
+  );
+
   return (
     <Card
       sx={{ display: "flex", alignItems: "center", p: 3, ...sx }}
       {...other}
     >
       <Box sx={{ flexGrow: 1 }}>
-        <Typography variant="subtitle2">{title}</Typography>
-
-        <Stack direction="row" alignItems="center" sx={{ mt: 2, mb: 1 }}>
-          <Iconify
-            width={24}
-            icon={
-              percent < 0
-                ? "solar:double-alt-arrow-down-bold-duotone"
-                : "solar:double-alt-arrow-up-bold-duotone"
-            }
-            sx={{
-              mr: 1,
-              color: "success.main",
-              ...(percent < 0 && {
-                color: "error.main",
-              }),
-            }}
-          />
-
-          <Typography component="div" variant="subtitle2">
-            {percent > 0 && "+"}
-
-            {fPercent(percent)}
-          </Typography>
-        </Stack>
-
-        <Typography variant="h3">{fNumber(total)}</Typography>
+        <Box sx={{ typography: "subtitle2" }}>{title}</Box>
+        <Box sx={{ mt: 1.5, mb: 1, typography: "h3" }}>
+          {fNumber(total)}
+          {UOM && (
+            <span
+              style={{
+                marginLeft: 10,
+                fontSize: 24,
+                fontWeight: 2,
+              }}
+            >
+              {UOM}
+            </span>
+          )}
+        </Box>
+        {renderTrending}
       </Box>
 
       <Chart

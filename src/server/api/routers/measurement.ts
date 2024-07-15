@@ -1,3 +1,4 @@
+import { startOfDay, subDays } from "date-fns";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
@@ -158,5 +159,54 @@ export const measurementRouter = createTRPCRouter({
         datetime: "asc",
       },
     });
+  }),
+  totalEnergyLast7Days: protectedProcedure.query(async ({ ctx }) => {
+    // const today = startOfDay(new Date());
+    const today = startOfDay(new Date(2024, 4, 24));
+    const sevenDaysAgo = subDays(today, 7);
+    const fourteenDaysAgo = subDays(today, 14);
+
+    // Energy for the last 7 days
+    const last7DaysEnergy = await ctx.db.measurement.aggregate({
+      _sum: {
+        e: true,
+      },
+      where: {
+        datetime: {
+          gte: sevenDaysAgo,
+          lt: today,
+        },
+      },
+    });
+
+    // Energy for the previous 7 days
+    const previous7DaysEnergy = await ctx.db.measurement.aggregate({
+      _sum: {
+        e: true,
+      },
+      where: {
+        datetime: {
+          gte: fourteenDaysAgo,
+          lt: sevenDaysAgo,
+        },
+      },
+    });
+
+    let last7DaysTotal: number = last7DaysEnergy._sum.e ?? 0;
+    const previous7DaysTotal: number = previous7DaysEnergy._sum.e ?? 0;
+
+    // Calculate the percentage difference
+    let percentageDifference = 0;
+    if (previous7DaysTotal !== 0) {
+      percentageDifference =
+        ((last7DaysTotal - previous7DaysTotal) / previous7DaysTotal) * 100;
+    }
+
+    last7DaysTotal = last7DaysTotal / 1000;
+
+    return {
+      totalEnergyLast7Days: last7DaysTotal,
+      percentageDifference: percentageDifference,
+    };
   }),
 });
