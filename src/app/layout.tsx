@@ -61,6 +61,7 @@ export default function RootLayout({
             <SettingsProvider
               defaultSettings={{
                 themeMode: "light",
+                themeDirection: "ltr", //  'rtl' | 'ltr'
                 themeContrast: "default",
                 themeLayout: "vertical",
                 themeColorPresets: "default",
