@@ -111,6 +111,8 @@ export default function OverviewWidgetSummary({
         dir="ltr"
         type="bar"
         series={[{ data: series }]}
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         options={chartOptions}
         width={60}
         height={36}
