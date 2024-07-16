@@ -84,17 +84,17 @@ export default function RegisterView() {
 
   const renderHead = (
     <Stack spacing={2} sx={{ mb: 5, position: "relative" }}>
-      <Typography variant="h4">Registruj se apsolutno besplatno</Typography>
+      <Typography variant="h4">Get started absolutely free</Typography>
 
       <Stack direction="row" spacing={0.5}>
-        <Typography variant="body2"> Vec imas nalog? </Typography>
+        <Typography variant="body2"> Already have an account?</Typography>
 
         <Link
           href={paths.auth.login}
           component={RouterLink}
           variant="subtitle2"
         >
-          Prijavi se
+          Sign In
         </Link>
       </Stack>
     </Stack>
@@ -110,13 +110,13 @@ export default function RegisterView() {
         color: "text.secondary",
       }}
     >
-      {"Prijavom prihvatam "}
+      {"By signing up, I agree to "}
       <Link underline="always" color="text.primary">
-        Uslovi korišćenja
+        Terms of Service
       </Link>
-      {" i "}
+      {" and "}
       <Link underline="always" color="text.primary">
-        Politika o privatnosti
+        Privacy Policy
       </Link>
       .
     </Typography>
@@ -125,15 +125,16 @@ export default function RegisterView() {
   const renderForm = (
     <Stack spacing={2.5}>
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-        <RHFTextField name="firstName" label="Ime" />
-        <RHFTextField name="lastName" label="Prezime" />
+        <RHFTextField name="firstName" label="Name" />
+        <RHFTextField name="lastName" label="Last Name" />
       </Stack>
 
-      <RHFTextField name="email" label="Email adresa" />
+      <RHFTextField name="email" label="Email" />
 
       <RHFTextField
         name="password"
-        label="Lozinka"
+        label="Password"
+        placeholder="6+ characters"
         type={password.value ? "text" : "password"}
         InputProps={{
           endAdornment: (
@@ -158,7 +159,7 @@ export default function RegisterView() {
         variant="contained"
         loading={isSubmitting}
       >
-        Napravi nalog
+        Create account
       </LoadingButton>
     </Stack>
   );

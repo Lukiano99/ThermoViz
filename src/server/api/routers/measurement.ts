@@ -1,162 +1,443 @@
+import { TRPCError } from "@trpc/server";
+import { format, startOfDay, subDays } from "date-fns";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+type EnergyPerDay = {
+  date: string;
+  total_energy: number;
+};
 
 export const measurementRouter = createTRPCRouter({
-  // Vraća sve merenja
-  list: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.measurement.findMany();
-  }),
+  // // Vraća sve merenja
+  // list: protectedProcedure.query(async ({ ctx }) => {
+  //   return await ctx.db.measurement.findMany();
+  // }),
 
-  // Vraća merenja za određenu lokaciju
-  getByLocation: protectedProcedure
-    .input(z.object({ location: z.string() }))
-    .query(async ({ ctx, input }) => {
-      return await ctx.db.measurement.findMany({
-        where: { location: input.location },
-      });
-    }),
+  // // Vraća merenja za određenu lokaciju
+  // getByLocation: protectedProcedure
+  //   .input(z.object({ location: z.string() }))
+  //   .query(async ({ ctx, input }) => {
+  //     return await ctx.db.measurement.findMany({
+  //       where: { location: input.location },
+  //     });
+  //   }),
 
-  // Vraća merenja za određeni vremenski interval
-  getByDateRange: protectedProcedure
-    .input(
-      z.object({
-        startDate: z.string(),
-        endDate: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      return await ctx.db.measurement.findMany({
+  // // Vraća merenja za određeni vremenski interval
+  // getByDateRange: protectedProcedure
+  //   .input(
+  //     z.object({
+  //       startDate: z.string(),
+  //       endDate: z.string(),
+  //     }),
+  //   )
+  //   .query(async ({ ctx, input }) => {
+  //     return await ctx.db.measurement.findMany({
+  //       where: {
+  //         datetime: {
+  //           gte: new Date(input.startDate),
+  //           lte: new Date(input.endDate),
+  //         },
+  //       },
+  //     });
+  //   }),
+
+  // // Vraća najnovija merenja
+  // getRecent: protectedProcedure.query(async ({ ctx }) => {
+  //   return await ctx.db.measurement.findMany({
+  //     orderBy: {
+  //       datetime: "desc",
+  //     },
+  //     take: 10, // Vraća 10 najnovijih merenja
+  //   });
+  // }),
+
+  // // Vraća merenja za određeni raspon temperature
+  // getByTemperatureRange: protectedProcedure
+  //   .input(
+  //     z.object({
+  //       minTemperature: z.number(),
+  //       maxTemperature: z.number(),
+  //       temperatureField: z.enum([
+  //         "t_amb",
+  //         "t_ref",
+  //         "t_sup_prim",
+  //         "t_ret_prim",
+  //         "t_sup_sec",
+  //         "t_ret_sec",
+  //       ]),
+  //     }),
+  //   )
+  //   .query(async ({ ctx, input }) => {
+  //     return await ctx.db.measurement.findMany({
+  //       where: {
+  //         [input.temperatureField]: {
+  //           gte: input.minTemperature,
+  //           lte: input.maxTemperature,
+  //         },
+  //       },
+  //     });
+  //   }),
+  // // Prosečne temperature po danu
+  // getAverageTemperatureByDay: protectedProcedure.query(async ({ ctx }) => {
+  //   return await ctx.db.measurement.groupBy({
+  //     by: ["datetime"],
+  //     _avg: {
+  //       t_amb: true,
+  //       t_ref: true,
+  //       t_sup_prim: true,
+  //       t_ret_prim: true,
+  //       t_sup_sec: true,
+  //       t_ret_sec: true,
+  //     },
+  //     orderBy: {
+  //       datetime: "asc",
+  //     },
+  //   });
+  // }),
+
+  // // Prosečna potrošnja energije po danu
+  // getAverageEnergyConsumptionByDay: protectedProcedure.query(
+  //   async ({ ctx }) => {
+  //     return await ctx.db.measurement.groupBy({
+  //       by: ["datetime"],
+  //       _avg: {
+  //         e: true,
+  //         pe: true,
+  //       },
+  //       orderBy: {
+  //         datetime: "asc",
+  //       },
+  //     });
+  //   },
+  // ),
+
+  // // Prosečne temperature po lokaciji
+  // getAverageTemperatureByLocation: protectedProcedure.query(async ({ ctx }) => {
+  //   return await ctx.db.measurement.groupBy({
+  //     by: ["location"],
+  //     _avg: {
+  //       t_amb: true,
+  //       t_ref: true,
+  //       t_sup_prim: true,
+  //       t_ret_prim: true,
+  //       t_sup_sec: true,
+  //       t_ret_sec: true,
+  //     },
+  //   });
+  // }),
+
+  // // Dnevni temperaturni rasponi
+  // getDailyTemperatureRange: protectedProcedure.query(async ({ ctx }) => {
+  //   return await ctx.db.measurement.groupBy({
+  //     by: ["datetime"],
+  //     _min: {
+  //       t_amb: true,
+  //       t_ref: true,
+  //       t_sup_prim: true,
+  //       t_ret_prim: true,
+  //       t_sup_sec: true,
+  //       t_ret_sec: true,
+  //     },
+  //     _max: {
+  //       t_amb: true,
+  //       t_ref: true,
+  //       t_sup_prim: true,
+  //       t_ret_prim: true,
+  //       t_sup_sec: true,
+  //       t_ret_sec: true,
+  //     },
+  //     orderBy: {
+  //       datetime: "asc",
+  //     },
+  //   });
+  // }),
+  totalEnergyLastNDays: protectedProcedure
+    .input(z.object({ days: z.number().positive() })) // Input validation
+    .query(async ({ input, ctx }) => {
+      const { days } = input;
+      // const today = startOfDay(new Date());
+      const today = startOfDay(new Date(2024, 4, 20));
+      const nDaysAgo = subDays(today, days);
+      const nDaysBeforeThat = subDays(today, 2 * days);
+
+      const distinctDatesCountObject = await ctx.db.$queryRaw<
+        {
+          distinct_dates_count: number;
+        }[]
+      >`
+      SELECT COUNT(DISTINCT DATE_TRUNC('day', datetime)) AS distinct_dates_count
+      FROM "Measurement"
+      WHERE datetime >= ${nDaysAgo} AND datetime < ${today};
+    `;
+      if (!distinctDatesCountObject[0]) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Distinct Dates Count did not return properly value`,
+        });
+      }
+      const distinctDatesCount = Number(
+        distinctDatesCountObject[0].distinct_dates_count,
+      );
+
+      if (distinctDatesCount < input.days) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Data for some days in the last ${days} days is missing`,
+        });
+      }
+      // Energy for the last N days
+      const lastNDaysEnergy = await ctx.db.measurement.aggregate({
+        _sum: {
+          e: true,
+        },
         where: {
           datetime: {
-            gte: new Date(input.startDate),
-            lte: new Date(input.endDate),
+            gte: nDaysAgo,
+            lt: today,
           },
         },
       });
+
+      // Energy for the previous N days
+      const previousNDaysEnergy = await ctx.db.measurement.aggregate({
+        _sum: {
+          e: true,
+        },
+        where: {
+          datetime: {
+            gte: nDaysBeforeThat,
+            lt: nDaysAgo,
+          },
+        },
+      });
+
+      let lastNDaysTotal: number = lastNDaysEnergy._sum.e ?? 0;
+      const previousNDaysTotal = previousNDaysEnergy._sum.e ?? 0;
+
+      // Calculate the percentage difference
+      let percentageDifference = 0;
+      if (previousNDaysTotal !== 0) {
+        percentageDifference =
+          ((lastNDaysTotal - previousNDaysTotal) / previousNDaysTotal) * 100;
+      }
+      lastNDaysTotal = lastNDaysTotal / 1000;
+      return {
+        totalEnergyLastNDays: lastNDaysTotal,
+        percentageDifference: percentageDifference,
+      };
     }),
 
-  // Vraća najnovija merenja
-  getRecent: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.measurement.findMany({
-      orderBy: {
-        datetime: "desc",
-      },
-      take: 10, // Vraća 10 najnovijih merenja
-    });
-  }),
+  energyConsumptionByDays: protectedProcedure
+    .input(z.object({ days: z.number().positive() })) // Input validation
+    .query(async ({ ctx, input }) => {
+      const { days } = input;
+      // const today = startOfDay(new Date());
+      const today = startOfDay(new Date(2024, 4, 24));
 
-  // Vraća merenja za određeni raspon temperature
-  getByTemperatureRange: protectedProcedure
+      const startDate = format(subDays(today, days), "yyyy-MM-dd"); // Subtrahujemo 1 jer uključujemo i danas
+      const endDate = format(today, "yyyy-MM-dd"); // Kraj intervala (danas)
+
+      // Upit za računanje potrošnje energije po danima
+      const results: EnergyPerDay[] = await ctx.db.$queryRawUnsafe<
+        EnergyPerDay[]
+      >(`
+        SELECT DATE(datetime) as date, SUM(e) as total_energy
+        FROM "Measurement"
+        WHERE datetime >=  '${startDate}' AND datetime <= '${endDate}'
+        GROUP BY DATE(datetime)
+        ORDER BY date ASC;
+        `);
+
+      if (!results) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Data for some days in the last ${days} days is missing.`,
+        });
+      }
+
+      const totalEnergies = results.map(
+        (result: EnergyPerDay) => result.total_energy ?? 0,
+      );
+      return totalEnergies;
+    }),
+  totalLocationsMonitored: protectedProcedure.query(async ({ ctx }) => {
+    // Grupisanje po polju location i brojanje različitih lokacija
+    const result = await ctx.db.measurement.groupBy({
+      by: ["location"],
+      _count: {
+        location: true,
+      },
+    });
+
+    // Broj različitih lokacija je dužina rezultujućeg niza
+    const distinctLocationsCount = result.length;
+
+    return distinctLocationsCount;
+  }),
+  averageAmbientTemperature: protectedProcedure
     .input(
       z.object({
-        minTemperature: z.number(),
-        maxTemperature: z.number(),
-        temperatureField: z.enum([
-          "t_amb",
-          "t_ref",
-          "t_sup_prim",
-          "t_ret_prim",
-          "t_sup_sec",
-          "t_ret_sec",
-        ]),
+        nDaysAgo: z.number(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      return await ctx.db.measurement.findMany({
+      const today = startOfDay(new Date(2024, 4, 20));
+      // const today = startOfDay(new Date());
+
+      const nDaysAgo = subDays(today, input.nDaysAgo);
+      const twoNDaysAgo = subDays(today, 2 * input.nDaysAgo);
+
+      // Prosecna temperatura za proteklih N dana
+      const lastNDaysAvgTemp = await ctx.db.measurement.aggregate({
+        _avg: {
+          t_amb: true,
+        },
+
         where: {
-          [input.temperatureField]: {
-            gte: input.minTemperature,
-            lte: input.maxTemperature,
+          datetime: {
+            gte: nDaysAgo,
+            lt: today,
           },
         },
       });
-    }),
-  // Prosečne temperature po danu
-  getAverageTemperatureByDay: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.measurement.groupBy({
-      by: ["datetime"],
-      _avg: {
-        t_amb: true,
-        t_ref: true,
-        t_sup_prim: true,
-        t_ret_prim: true,
-        t_sup_sec: true,
-        t_ret_sec: true,
-      },
-      orderBy: {
-        datetime: "asc",
-      },
-    });
-  }),
 
-  // Prosečna potrošnja energije po danu
-  getAverageEnergyConsumptionByDay: protectedProcedure.query(
-    async ({ ctx }) => {
-      return await ctx.db.measurement.groupBy({
-        by: ["datetime"],
+      // Niz vrednosti temperatura za proteklih N dana
+      const lastNDaysTemperatures: {
+        date: Date;
+        avg_temp: number;
+      }[] = await ctx.db.$queryRaw<
+        {
+          date: Date;
+          avg_temp: number;
+        }[]
+      >`
+      SELECT DATE(datetime) as date, ROUND(AVG(t_amb)::numeric, 2) as avg_temp
+      FROM "Measurement"
+      WHERE datetime >= ${nDaysAgo} AND datetime < ${today}
+      GROUP BY DATE(datetime)
+      ORDER BY date ASC;
+    `;
+
+      // Prosecna temperatura za prethodnih 2*N dana (od nDaysAgo do twoNDaysAgo)
+      const previousTwoNDaysAvgTemp = await ctx.db.measurement.aggregate({
         _avg: {
-          e: true,
-          pe: true,
+          t_amb: true,
         },
-        orderBy: {
-          datetime: "asc",
+        where: {
+          datetime: {
+            gte: twoNDaysAgo,
+            lt: nDaysAgo,
+          },
         },
       });
-    },
-  ),
 
-  // Prosečne temperature po lokaciji
-  getAverageTemperatureByLocation: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.measurement.groupBy({
-      by: ["location"],
-      _avg: {
-        t_amb: true,
-        t_ref: true,
-        t_sup_prim: true,
-        t_ret_prim: true,
-        t_sup_sec: true,
-        t_ret_sec: true,
-      },
-    });
-  }),
+      const lastNDaysAverage = Number(
+        (lastNDaysAvgTemp._avg.t_amb ?? 0).toFixed(2),
+      );
+      const previousTwoNDaysAverage = previousTwoNDaysAvgTemp._avg.t_amb ?? 0;
 
+      // Izracunavanje procentne razlike
+      let percentageDifference = 0;
+      if (previousTwoNDaysAverage !== 0) {
+        percentageDifference =
+          ((lastNDaysAverage - previousTwoNDaysAverage) /
+            previousTwoNDaysAverage) *
+          100;
+      }
+
+      // Formatiranje rezultata za niz temperatura
+      const temperaturesArray = lastNDaysTemperatures.map(
+        (entry) => entry.avg_temp ?? 0,
+      );
+
+      return {
+        averageTemperatureLastNDays: lastNDaysAverage,
+        temperaturesArray: temperaturesArray,
+        percentageDifference: percentageDifference,
+      };
+    }),
   // Ukupna potrošnja energije po lokaciji
   getTotalEnergyConsumptionByLocation: protectedProcedure.query(
     async ({ ctx }) => {
-      return await ctx.db.measurement.groupBy({
-        by: ["location"],
-        _sum: {
-          e: true,
-          pe: true,
+      const totalEnergyConsumptionByLocation = await ctx.db.measurement.groupBy(
+        {
+          by: ["location"],
+          _sum: {
+            e: true,
+            // pe: true,
+          },
         },
-      });
+      );
+
+      // Transformacija podataka
+      const transformedData = totalEnergyConsumptionByLocation.map((item) => ({
+        location: item.location,
+        totalEnergyConsumptionByLocation: Number(
+          ((item._sum.e ?? 0) / 1000).toFixed(2),
+        ),
+      }));
+
+      // Izračunavanje ukupne potrošnje energije
+      const totalEnergyConsumption = Number(
+        (
+          transformedData.reduce(
+            (acc, curr) => acc + curr.totalEnergyConsumptionByLocation,
+            0,
+          ) / 1000
+        ).toFixed(2),
+      ); //in MWh
+
+      return {
+        totalEnergyConsumption,
+        data: transformedData,
+      };
     },
   ),
 
-  // Dnevni temperaturni rasponi
-  getDailyTemperatureRange: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.measurement.groupBy({
-      by: ["datetime"],
-      _min: {
-        t_amb: true,
-        t_ref: true,
-        t_sup_prim: true,
-        t_ret_prim: true,
-        t_sup_sec: true,
-        t_ret_sec: true,
-      },
-      _max: {
-        t_amb: true,
-        t_ref: true,
-        t_sup_prim: true,
-        t_ret_prim: true,
-        t_sup_sec: true,
-        t_ret_sec: true,
-      },
-      orderBy: {
-        datetime: "asc",
-      },
-    });
+  getMonthTemperatureData: protectedProcedure.query(async ({ ctx }) => {
+    // for N months ago
+    const nMonthsAgo = 2;
+    // const currentDate = new Date();
+    const currentDate = startOfDay(new Date(2024, 4, 24));
+
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth() + 1; // Months are 0-indexed in JavaScript
+
+    const startOfCurrentMonth = new Date(
+      currentYear,
+      currentMonth - nMonthsAgo,
+      2,
+    );
+    const endOfCurrentMonth = new Date(currentYear, currentMonth, 0);
+
+    const monthTemperatureData: {
+      month: string;
+      day: Date;
+      average_t_sup_prim: number;
+      average_t_ret_prim: number;
+    }[] = await ctx.db.$queryRaw`
+    SELECT
+    TRIM(TO_CHAR(DATE_TRUNC('day', datetime), 'Month')) AS month,
+    DATE_TRUNC('day', datetime) AS day,
+    ROUND(AVG(t_sup_prim)::numeric, 2) AS average_t_sup_prim,
+    ROUND(AVG(t_ret_prim)::numeric, 2) AS average_t_ret_prim
+    FROM
+    "Measurement"
+    WHERE
+      datetime >= ${startOfCurrentMonth} AND datetime <= ${endOfCurrentMonth}
+    GROUP BY
+    day
+    ORDER BY
+    day;
+    `;
+    if (!monthTemperatureData) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: `Month temperature data is missing. Something went wrong`,
+      });
+    }
+
+    return monthTemperatureData;
   }),
 });
