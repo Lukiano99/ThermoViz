@@ -22,18 +22,21 @@ export default function VerifyView() {
       <EmailInboxIcon sx={{ mb: 5, height: 96 }} />
 
       <Typography variant="h3" sx={{ mb: 1 }}>
-        Proveri svoj email!
+        Check Your Email!
       </Typography>
 
       <Stack
         spacing={1}
         sx={{ color: "text.secondary", typography: "body2", mb: 5 }}
       >
-        <Box component="span"> Poslali smo ti potvrdni link na email</Box>
+        <Box component="span">
+          {" "}
+          We have sent you a confirmation link to your email
+        </Box>
         <Box component="strong" sx={{ color: "text.primary" }}>
           {email}
         </Box>
-        <Box component="div">Proveri svoj inbox/spam</Box>
+        <Box component="div">Check your inbox/spam</Box>
       </Stack>
     </>
   );
