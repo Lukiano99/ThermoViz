@@ -84,7 +84,7 @@ export default function RegisterView() {
 
   const renderHead = (
     <Stack spacing={2} sx={{ mb: 5, position: "relative" }}>
-      <Typography variant="h4">Sign up for ThermoViz</Typography>
+      <Typography variant="h4">Get started absolutely free</Typography>
 
       <Stack direction="row" spacing={0.5}>
         <Typography variant="body2"> Already have an account?</Typography>
@@ -110,7 +110,7 @@ export default function RegisterView() {
         color: "text.secondary",
       }}
     >
-      {"By logging in, I accept the "}
+      {"By signing up, I agree to "}
       <Link underline="always" color="text.primary">
         Terms of Service
       </Link>
@@ -134,6 +134,7 @@ export default function RegisterView() {
       <RHFTextField
         name="password"
         label="Password"
+        placeholder="6+ characters"
         type={password.value ? "text" : "password"}
         InputProps={{
           endAdornment: (
@@ -158,7 +159,7 @@ export default function RegisterView() {
         variant="contained"
         loading={isSubmitting}
       >
-        Sign Up
+        Create account
       </LoadingButton>
     </Stack>
   );

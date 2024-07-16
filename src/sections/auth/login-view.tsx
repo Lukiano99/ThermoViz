@@ -78,14 +78,14 @@ export default function LoginView() {
       <Typography variant="h4">Sign in to your account</Typography>
 
       <Stack direction="row" spacing={0.5}>
-        <Typography variant="body2">New user? </Typography>
+        <Typography variant="body2">{"Don't have an account?"}</Typography>
 
         <Link
           component={RouterLink}
           href={paths.auth.register}
           variant="subtitle2"
         >
-          Create an account
+          Get started
         </Link>
       </Stack>
     </Stack>
@@ -122,7 +122,7 @@ export default function LoginView() {
         underline="always"
         sx={{ alignSelf: "flex-end" }}
       >
-        Forgot your password?
+        Forgot password?
       </Link>
 
       <LoadingButton

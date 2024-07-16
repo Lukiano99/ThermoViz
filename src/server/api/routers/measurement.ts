@@ -127,19 +127,6 @@ export const measurementRouter = createTRPCRouter({
   //   });
   // }),
 
-  // // Ukupna potrošnja energije po lokaciji
-  // getTotalEnergyConsumptionByLocation: protectedProcedure.query(
-  //   async ({ ctx }) => {
-  //     return await ctx.db.measurement.groupBy({
-  //       by: ["location"],
-  //       _sum: {
-  //         e: true,
-  //         pe: true,
-  //       },
-  //     });
-  //   },
-  // ),
-
   // // Dnevni temperaturni rasponi
   // getDailyTemperatureRange: protectedProcedure.query(async ({ ctx }) => {
   //   return await ctx.db.measurement.groupBy({
@@ -332,7 +319,6 @@ export const measurementRouter = createTRPCRouter({
       ORDER BY date ASC;
     `;
 
-      console.log({ lastNDaysTemperatures });
       // Prosecna temperatura za prethodnih 2*N dana (od nDaysAgo do twoNDaysAgo)
       const previousTwoNDaysAvgTemp = await ctx.db.measurement.aggregate({
         _avg: {
@@ -371,4 +357,87 @@ export const measurementRouter = createTRPCRouter({
         percentageDifference: percentageDifference,
       };
     }),
+  // Ukupna potrošnja energije po lokaciji
+  getTotalEnergyConsumptionByLocation: protectedProcedure.query(
+    async ({ ctx }) => {
+      const totalEnergyConsumptionByLocation = await ctx.db.measurement.groupBy(
+        {
+          by: ["location"],
+          _sum: {
+            e: true,
+            // pe: true,
+          },
+        },
+      );
+
+      // Transformacija podataka
+      const transformedData = totalEnergyConsumptionByLocation.map((item) => ({
+        location: item.location,
+        totalEnergyConsumptionByLocation: Number(
+          ((item._sum.e ?? 0) / 1000).toFixed(2),
+        ),
+      }));
+
+      // Izračunavanje ukupne potrošnje energije
+      const totalEnergyConsumption = Number(
+        (
+          transformedData.reduce(
+            (acc, curr) => acc + curr.totalEnergyConsumptionByLocation,
+            0,
+          ) / 1000
+        ).toFixed(2),
+      ); //in MWh
+
+      return {
+        totalEnergyConsumption,
+        data: transformedData,
+      };
+    },
+  ),
+
+  getMonthTemperatureData: protectedProcedure.query(async ({ ctx }) => {
+    // for N months ago
+    const nMonthsAgo = 2;
+    // const currentDate = new Date();
+    const currentDate = startOfDay(new Date(2024, 4, 24));
+
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth() + 1; // Months are 0-indexed in JavaScript
+
+    const startOfCurrentMonth = new Date(
+      currentYear,
+      currentMonth - nMonthsAgo,
+      2,
+    );
+    const endOfCurrentMonth = new Date(currentYear, currentMonth, 0);
+
+    const monthTemperatureData: {
+      month: string;
+      day: Date;
+      average_t_sup_prim: number;
+      average_t_ret_prim: number;
+    }[] = await ctx.db.$queryRaw`
+    SELECT
+    TRIM(TO_CHAR(DATE_TRUNC('day', datetime), 'Month')) AS month,
+    DATE_TRUNC('day', datetime) AS day,
+    ROUND(AVG(t_sup_prim)::numeric, 2) AS average_t_sup_prim,
+    ROUND(AVG(t_ret_prim)::numeric, 2) AS average_t_ret_prim
+    FROM
+    "Measurement"
+    WHERE
+      datetime >= ${startOfCurrentMonth} AND datetime <= ${endOfCurrentMonth}
+    GROUP BY
+    day
+    ORDER BY
+    day;
+    `;
+    if (!monthTemperatureData) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: `Month temperature data is missing. Something went wrong`,
+      });
+    }
+
+    return monthTemperatureData;
+  }),
 });
