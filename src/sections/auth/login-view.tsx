@@ -43,8 +43,8 @@ export default function LoginView() {
   });
 
   const defaultValues = {
-    email: "",
-    password: "",
+    email: "demo@example.com",
+    password: "demo1234",
   };
 
   const methods = useForm({
