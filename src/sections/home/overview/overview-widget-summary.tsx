@@ -13,7 +13,7 @@ interface Props extends CardProps {
   total: number;
   percent: number;
   UOM?: string;
-  lastDays: number;
+  lastDays?: number;
   chart: {
     colors?: string[];
     series: number[];
@@ -117,7 +117,6 @@ export default function OverviewWidgetSummary({
             mt: 1.5,
             mb: 1,
             typography: "h3",
-            color: total === 0 ? "#FFCC00" : "Background",
           }}
         >
           {fNumber(total)}
