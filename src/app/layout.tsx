@@ -21,9 +21,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "T3 Minimal UI Kit",
+  title: "ThermoViz",
   description:
-    "The starting point for your next project with T3 Minimal UI Kit, built on the newest version of Material-UI ©, ready to be customized to your style",
+    "ThermoViz Insights is a cutting-edge application designed to visualize energy data in district heating systems. It offers intuitive dashboards, real-time analytics, and comprehensive reporting tools to help you monitor and optimize your heating network’s performance.",
   keywords: "react,material,kit,application,dashboard,admin,template",
   manifest: "/manifest.json",
   icons: [

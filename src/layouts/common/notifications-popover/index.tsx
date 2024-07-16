@@ -172,10 +172,18 @@ export default function NotificationsPopover() {
         }}
       >
         {renderHead}
-
         <Divider />
-
         <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{ pl: 2.5, pr: 1 }}
+        >
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            @TODO Notifications
+          </Typography>
+        </Stack>
+        {/* <Stack
           direction="row"
           alignItems="center"
           justifyContent="space-between"
@@ -195,7 +203,7 @@ export default function NotificationsPopover() {
           <Button fullWidth size="large">
             View All
           </Button>
-        </Box>
+        </Box> */}
       </Drawer>
     </>
   );
