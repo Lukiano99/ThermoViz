@@ -4,7 +4,7 @@ import { useTheme } from "@mui/material/styles";
 
 import { api } from "@/trpc/react";
 
-import OverviewWidgetSummary from "../overview-widget-summary";
+import OverviewWidgetSummary from "./overview-widget-summary";
 
 interface EnergyConsumptionWidgetProps {
   lastDays: number;
@@ -52,8 +52,10 @@ const EnergyConsumptionWidget = ({
 
   return (
     <>
-      {isLoading && <Skeleton sx={{ width: "100%", height: "100%" }} />}
-      {!isLoading && (
+      {isLoading && isLoadingECBD && (
+        <Skeleton sx={{ width: "100%", height: "100%" }} />
+      )}
+      {!isLoading && totalEnergyLastNDays && (
         <OverviewWidgetSummary
           title={widgetTitle}
           percent={widgetPercent}

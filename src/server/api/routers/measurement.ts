@@ -295,8 +295,8 @@ export const measurementRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      // const today = startOfDay(new Date());
       const today = startOfDay(new Date(2024, 4, 20));
+      // const today = startOfDay(new Date());
 
       const nDaysAgo = subDays(today, input.nDaysAgo);
       const twoNDaysAgo = subDays(today, 2 * input.nDaysAgo);
@@ -306,6 +306,7 @@ export const measurementRouter = createTRPCRouter({
         _avg: {
           t_amb: true,
         },
+
         where: {
           datetime: {
             gte: nDaysAgo,
@@ -315,22 +316,23 @@ export const measurementRouter = createTRPCRouter({
       });
 
       // Niz vrednosti temperatura za proteklih N dana
-      const lastNDaysTemperatures = await ctx.db.measurement.groupBy({
-        by: ["datetime"],
-        _avg: {
-          t_amb: true,
-        },
-        where: {
-          datetime: {
-            gte: nDaysAgo,
-            lt: today,
-          },
-        },
-        orderBy: {
-          datetime: "asc",
-        },
-      });
+      const lastNDaysTemperatures: {
+        date: Date;
+        avg_temp: number;
+      }[] = await ctx.db.$queryRaw<
+        {
+          date: Date;
+          avg_temp: number;
+        }[]
+      >`
+      SELECT DATE(datetime) as date, ROUND(AVG(t_amb)::numeric, 2) as avg_temp
+      FROM "Measurement"
+      WHERE datetime >= ${nDaysAgo} AND datetime < ${today}
+      GROUP BY DATE(datetime)
+      ORDER BY date ASC;
+    `;
 
+      console.log({ lastNDaysTemperatures });
       // Prosecna temperatura za prethodnih 2*N dana (od nDaysAgo do twoNDaysAgo)
       const previousTwoNDaysAvgTemp = await ctx.db.measurement.aggregate({
         _avg: {
@@ -344,7 +346,9 @@ export const measurementRouter = createTRPCRouter({
         },
       });
 
-      const lastNDaysAverage = lastNDaysAvgTemp._avg.t_amb ?? 0;
+      const lastNDaysAverage = Number(
+        (lastNDaysAvgTemp._avg.t_amb ?? 0).toFixed(2),
+      );
       const previousTwoNDaysAverage = previousTwoNDaysAvgTemp._avg.t_amb ?? 0;
 
       // Izracunavanje procentne razlike
@@ -358,13 +362,9 @@ export const measurementRouter = createTRPCRouter({
 
       // Formatiranje rezultata za niz temperatura
       const temperaturesArray = lastNDaysTemperatures.map(
-        (entry) => entry._avg.t_amb ?? 0,
+        (entry) => entry.avg_temp ?? 0,
       );
-      console.log({
-        lastNDaysAverage,
-        temperaturesArray,
-        percentageDifference,
-      });
+
       return {
         averageTemperatureLastNDays: lastNDaysAverage,
         temperaturesArray: temperaturesArray,

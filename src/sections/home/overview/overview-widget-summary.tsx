@@ -86,9 +86,7 @@ export default function OverviewWidgetSummary({
         sx={{
           flexShrink: 0,
           color: "error.main",
-          ...(percent < -10 && { color: "success.main" }),
-          ...(percent < -2 && percent > -10 && { color: "info.main" }),
-          ...(percent > -2 && { color: "warning.main" }),
+          ...(percent < 0 && { color: "success.main" }),
         }}
       />
 

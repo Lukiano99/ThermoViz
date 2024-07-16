@@ -5,9 +5,8 @@ import { useTheme } from "@mui/material/styles";
 import { useSettingsContext } from "@/components/settings";
 import { api } from "@/trpc/react";
 
+import EnergyConsumptionWidget from "../energy-consumption-widget";
 import OverviewWidgetSummary from "../overview-widget-summary";
-
-import EnergyConsumptionWidget from "./energy-consumption-widget";
 
 export default function HomeOverviewView() {
   const settings = useSettingsContext();
@@ -15,7 +14,7 @@ export default function HomeOverviewView() {
   const { data: totalLocationsMonitored, isLoading } =
     api.measurement.totalLocationsMonitored.useQuery();
 
-  const { data: averageTemperatures } =
+  const { data: averageTemperatures, isLoading: isLoadingAverageTemperatures } =
     api.measurement.averageAmbientTemperature.useQuery({
       nDaysAgo: 5,
     });
@@ -34,20 +33,16 @@ export default function HomeOverviewView() {
         </Grid>
 
         <Grid xs={12} md={4} item>
-          {isLoading && <Skeleton sx={{ width: "100%", height: "100%" }} />}
-          {!isLoading && totalLocationsMonitored && (
+          {!isLoadingAverageTemperatures && averageTemperatures && (
             <OverviewWidgetSummary
-              title="Total Locations Monitored"
-              percent={0}
-              UOM="locations"
-              total={totalLocationsMonitored}
+              title="Average Temperatures last 7 days"
+              percent={averageTemperatures.percentageDifference}
+              UOM="°C"
+              total={averageTemperatures.averageTemperatureLastNDays}
               chart={{
-                colors: [
-                  theme.palette.warning.light,
-                  theme.palette.warning.main,
-                ],
-                series: [8, 9, 31, 8, 16, 37, 8, 33, 46, 31],
+                series: averageTemperatures?.temperaturesArray,
               }}
+              lastDays={7}
             />
           )}
         </Grid>
