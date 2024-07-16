@@ -1,4 +1,4 @@
-import OneView from "src/sections/one/view";
+import OneView from "@/sections/one/view/view";
 
 // ----------------------------------------------------------------------
 
