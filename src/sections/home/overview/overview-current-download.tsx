@@ -39,7 +39,7 @@ interface Props extends CardProps {
   };
 }
 
-export default function EnergyByLocation({
+export default function OverviewEnergyByLocation({
   title,
   subheader,
   UOM,

@@ -4,9 +4,9 @@ import { Container, Grid, Skeleton } from "@mui/material";
 import { useSettingsContext } from "@/components/settings";
 import { api } from "@/trpc/react";
 
-import EnergyConsumptionWidget from "../energy-consumption-widget";
-import TemperatureDifference from "../overview-area-installed";
-import EnergyByLocation from "../overview-current-download";
+import OverviewTemperatureDifference from "../overview-area-installed";
+import OverviewEnergyByLocation from "../overview-current-download";
+import OverviewEnergyConsumptionWidget from "../overview-energy-consumption-widget";
 import OverviewWidgetSummary from "../overview-widget-summary";
 
 export default function HomeOverviewView() {
@@ -29,11 +29,11 @@ export default function HomeOverviewView() {
     <Container maxWidth={settings.themeStretch ? false : "xl"}>
       <Grid container spacing={3}>
         <Grid xs={12} md={4} item>
-          <EnergyConsumptionWidget lastDays={7} UOM="MWh" />
+          <OverviewEnergyConsumptionWidget lastDays={7} UOM="MWh" />
         </Grid>
 
         <Grid xs={12} md={4} item>
-          <EnergyConsumptionWidget lastDays={10} UOM="MWh" />
+          <OverviewEnergyConsumptionWidget lastDays={10} UOM="MWh" />
         </Grid>
 
         <Grid xs={12} md={4} item>
@@ -59,7 +59,7 @@ export default function HomeOverviewView() {
             <Skeleton sx={{ width: "100%", height: "100%" }} />
           )}
           {!isLoadingByLocation && totalEnergyConsumptionByLocation && (
-            <EnergyByLocation
+            <OverviewEnergyByLocation
               title="Energy Consumption by Location"
               UOM="MWh"
               chart={{
@@ -77,7 +77,7 @@ export default function HomeOverviewView() {
             <Skeleton sx={{ width: "100%", height: "100%" }} />
           )}
           {monthTemperatureData && (
-            <TemperatureDifference
+            <OverviewTemperatureDifference
               title="Supply & Return in °C"
               subheader="Temperature difference between primary supply and return in the primary circuit"
               chart={{

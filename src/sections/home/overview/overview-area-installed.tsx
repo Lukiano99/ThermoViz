@@ -29,7 +29,7 @@ interface Props extends CardProps {
   };
 }
 
-export default function TemperatureDifference({
+export default function OverviewTemperatureDifference({
   title,
   subheader,
   chart,

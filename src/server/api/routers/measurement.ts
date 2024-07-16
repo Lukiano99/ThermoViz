@@ -386,7 +386,7 @@ export const measurementRouter = createTRPCRouter({
             0,
           ) / 1000
         ).toFixed(2),
-      ); //in MWh
+      ); // MWh
 
       return {
         totalEnergyConsumption,
@@ -396,7 +396,7 @@ export const measurementRouter = createTRPCRouter({
   ),
 
   getMonthTemperatureData: protectedProcedure.query(async ({ ctx }) => {
-    // for N months ago
+    // za N meseca unazad
     const nMonthsAgo = 2;
     // const currentDate = new Date();
     const currentDate = startOfDay(new Date(2024, 4, 24));

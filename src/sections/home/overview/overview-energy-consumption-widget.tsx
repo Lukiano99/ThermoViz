@@ -10,7 +10,7 @@ interface EnergyConsumptionWidgetProps {
   lastDays: number;
   UOM?: string;
 }
-const EnergyConsumptionWidget = ({
+const OverviewEnergyConsumptionWidget = ({
   lastDays,
   UOM,
 }: EnergyConsumptionWidgetProps) => {
@@ -81,4 +81,4 @@ const EnergyConsumptionWidget = ({
   );
 };
 
-export default EnergyConsumptionWidget;
+export default OverviewEnergyConsumptionWidget;
