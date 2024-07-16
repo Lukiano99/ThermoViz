@@ -69,7 +69,7 @@ export default function ForgotPasswordView() {
         variant="contained"
         loading={isSubmitting}
       >
-        Pošalji zahtev
+        Send request
       </LoadingButton>
 
       <Link
@@ -83,7 +83,7 @@ export default function ForgotPasswordView() {
         }}
       >
         <Iconify icon="eva:arrow-ios-back-fill" width={16} />
-        Vrati se na prijavu
+        Back to Sign In Form
       </Link>
     </Stack>
   );
