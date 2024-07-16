@@ -7,9 +7,7 @@ type EnergyPerDay = {
   date: string;
   total_energy: number;
 };
-type RecordCounts = {
-  distinct_dates_count: number;
-};
+
 export const measurementRouter = createTRPCRouter({
   // Vraća sve merenja
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -176,18 +174,31 @@ export const measurementRouter = createTRPCRouter({
       const nDaysAgo = subDays(today, days);
       const nDaysBeforeThat = subDays(today, 2 * days);
 
-      const distinctDatesCount = await ctx.db.$queryRaw<RecordCounts[]>`
+      const distinctDatesCountObject = await ctx.db.$queryRaw<
+        {
+          distinct_dates_count: number;
+        }[]
+      >`
       SELECT COUNT(DISTINCT DATE_TRUNC('day', datetime)) AS distinct_dates_count
       FROM "Measurement"
       WHERE datetime >= ${nDaysAgo} AND datetime < ${today};
     `;
-      console.log(distinctDatesCount);
-      // if (distinctDatesCount < input.days) {
-      //   throw new TRPCError({
-      //     code: "NOT_FOUND",
-      //     message: `Data for some days in the last ${days} days is missing.`,
-      //   });
-      // }
+      if (!distinctDatesCountObject[0]) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Distinct Dates Count did not return properly value`,
+        });
+      }
+      const distinctDatesCount = Number(
+        distinctDatesCountObject[0].distinct_dates_count,
+      );
+
+      if (distinctDatesCount < input.days) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Data for some days in the last ${days} days is missing`,
+        });
+      }
       // Energy for the last N days
       const lastNDaysEnergy = await ctx.db.measurement.aggregate({
         _sum: {

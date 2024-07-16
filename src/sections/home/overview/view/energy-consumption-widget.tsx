@@ -1,5 +1,6 @@
 "use client";
 import { Skeleton } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
 import { api } from "@/trpc/react";
 
@@ -23,7 +24,6 @@ const EnergyConsumptionWidget = ({
     data: energyConsumptionByDays,
     isLoading: isLoadingECBD,
     isError: isErrorECBD,
-    failureReason: failureReasonECBD,
   } = api.measurement.energyConsumptionByDays.useQuery({ days: lastDays });
 
   const widgetTitle =
@@ -44,28 +44,35 @@ const EnergyConsumptionWidget = ({
         : 0;
 
   const widgetSeries =
-    !isLoading && !isErrorECBD && energyConsumptionByDays
+    !isLoadingECBD && !isErrorECBD && energyConsumptionByDays
       ? energyConsumptionByDays
       : [];
 
-  console.log(totalEnergyLastNDays);
+  const theme = useTheme();
 
   return (
     <>
       {isLoading && <Skeleton sx={{ width: "100%", height: "100%" }} />}
       {!isLoading && (
         <OverviewWidgetSummary
-          title={
-            isError && failureReason
-              ? failureReason.message
-              : `Total Energy Delivered in the last ${lastDays} days`
-          }
+          title={widgetTitle}
           percent={widgetPercent}
           UOM={UOM}
           total={widgetTotal}
           chart={{
-            series: widgetSeries,
+            series: !isLoadingECBD || !isErrorECBD ? widgetSeries : [],
+            colors:
+              widgetPercent > 0
+                ? [theme.palette.error.main, theme.palette.error.main]
+                : widgetPercent < 0 && widgetPercent > -2
+                  ? [theme.palette.warning.main, theme.palette.warning.main]
+                  : widgetPercent < -2 && widgetPercent > -10
+                    ? [theme.palette.info.main, theme.palette.info.main]
+                    : widgetPercent < -10
+                      ? [theme.palette.success.main, theme.palette.success.main]
+                      : [],
           }}
+          lastDays={lastDays}
         />
       )}
     </>

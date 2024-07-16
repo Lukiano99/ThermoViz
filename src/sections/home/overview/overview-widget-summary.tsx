@@ -13,6 +13,7 @@ interface Props extends CardProps {
   total: number;
   percent: number;
   UOM?: string;
+  lastDays: number;
   chart: {
     colors?: string[];
     series: number[];
@@ -25,6 +26,7 @@ export default function OverviewWidgetSummary({
   percent,
   UOM,
   total,
+  lastDays,
   chart,
   sx,
   ...other
@@ -83,8 +85,10 @@ export default function OverviewWidgetSummary({
         }
         sx={{
           flexShrink: 0,
-          color: "success.main",
-          ...(percent < 0 && { color: "error.main" }),
+          color: "error.main",
+          ...(percent < -10 && { color: "success.main" }),
+          ...(percent < -2 && percent > -10 && { color: "info.main" }),
+          ...(percent > -2 && { color: "warning.main" }),
         }}
       />
 
@@ -96,7 +100,7 @@ export default function OverviewWidgetSummary({
         component="span"
         sx={{ typography: "body2", color: "text.secondary" }}
       >
-        last 7 days
+        last {lastDays} days
       </Box>
     </Box>
   );
@@ -108,8 +112,16 @@ export default function OverviewWidgetSummary({
     >
       <Box sx={{ flexGrow: 1 }}>
         <Box sx={{ typography: "subtitle2" }}>{title}</Box>
-        <Box sx={{ mt: 1.5, mb: 1, typography: "h3" }}>
+        <Box
+          sx={{
+            mt: 1.5,
+            mb: 1,
+            typography: "h3",
+            color: total === 0 ? "#FFCC00" : "Background",
+          }}
+        >
           {fNumber(total)}
+          {total === 0 && "No Data"}
           {UOM && (
             <span
               style={{
@@ -118,7 +130,7 @@ export default function OverviewWidgetSummary({
                 fontWeight: 2,
               }}
             >
-              {UOM}
+              {total !== 0 && UOM}
             </span>
           )}
         </Box>
