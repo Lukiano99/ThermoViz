@@ -1,6 +1,5 @@
 "use client";
 import { Container, Grid, Skeleton } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 
 import { useSettingsContext } from "@/components/settings";
 import { api } from "@/trpc/react";
@@ -10,9 +9,6 @@ import OverviewWidgetSummary from "../overview-widget-summary";
 
 export default function HomeOverviewView() {
   const settings = useSettingsContext();
-  const theme = useTheme();
-  const { data: totalLocationsMonitored, isLoading } =
-    api.measurement.totalLocationsMonitored.useQuery();
 
   const { data: averageTemperatures, isLoading: isLoadingAverageTemperatures } =
     api.measurement.averageAmbientTemperature.useQuery({
@@ -33,6 +29,9 @@ export default function HomeOverviewView() {
         </Grid>
 
         <Grid xs={12} md={4} item>
+          {isLoadingAverageTemperatures && (
+            <Skeleton sx={{ width: "100%", height: "100%" }} />
+          )}
           {!isLoadingAverageTemperatures && averageTemperatures && (
             <OverviewWidgetSummary
               title="Average Temperatures last 7 days"
