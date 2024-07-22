@@ -58,7 +58,9 @@ export default function OverviewWidgetSummary({
     plotOptions: {
       bar: {
         columnWidth: "68%",
-        borderRadius: 2,
+        borderRadius: 1.5,
+        borderRadiusApplication: "end",
+        borderRadiusWhenStacked: "last",
       },
     },
     tooltip: {

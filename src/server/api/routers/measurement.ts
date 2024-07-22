@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { format, startOfDay, subDays } from "date-fns";
+import { endOfDay, format, startOfDay, subDays } from "date-fns";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
@@ -41,16 +41,6 @@ export const measurementRouter = createTRPCRouter({
   //       },
   //     });
   //   }),
-
-  // // Vraća najnovija merenja
-  // getRecent: protectedProcedure.query(async ({ ctx }) => {
-  //   return await ctx.db.measurement.findMany({
-  //     orderBy: {
-  //       datetime: "desc",
-  //     },
-  //     take: 10, // Vraća 10 najnovijih merenja
-  //   });
-  // }),
 
   // // Vraća merenja za određeni raspon temperature
   // getByTemperatureRange: protectedProcedure
@@ -439,5 +429,100 @@ export const measurementRouter = createTRPCRouter({
     }
 
     return monthTemperatureData;
+  }),
+  // Vraća najnovija merenja
+  getRecent: protectedProcedure.query(async ({ ctx }) => {
+    const data = await ctx.db.measurement.findMany({
+      orderBy: {
+        datetime: "desc",
+      },
+      select: {
+        datetime: true,
+        location: true,
+        e: true,
+        pe: true,
+      },
+      take: 10, // Vraća 10 najnovijih merenja
+    });
+    if (!data) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: `Recent data is missing`,
+      });
+    }
+    return data.map((record) => ({
+      date: record.datetime.toLocaleDateString(),
+      time: record.datetime.toLocaleTimeString(),
+      location: record.location,
+      energy: record.e,
+      power: record.pe,
+    }));
+  }),
+  // Prosečne temperature po lokaciji za danas
+  getAverageTemperatureByLocation: protectedProcedure.query(async ({ ctx }) => {
+    // const today = startOfDay(new Date());
+    const today = startOfDay(new Date(2024, 4, 20));
+    const startOfToday = startOfDay(today);
+    const endOfToday = endOfDay(today);
+    const data = await ctx.db.measurement.groupBy({
+      by: ["location"],
+      where: {
+        datetime: {
+          gte: startOfToday,
+          lte: endOfToday,
+        },
+      },
+      _avg: {
+        t_amb: true,
+        t_ref: true,
+        t_sup_prim: true,
+        t_ret_prim: true,
+        t_sup_sec: true,
+        t_ret_sec: true,
+        e: true,
+      },
+      _sum: {
+        e: true,
+      },
+    });
+
+    if (!data) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: `Average temperatures by location data is missing`,
+      });
+    }
+
+    const totalEnergy = await ctx.db.measurement.aggregate({
+      _sum: {
+        e: true,
+      },
+      where: {
+        datetime: {
+          gte: startOfToday,
+          lte: endOfToday,
+        },
+      },
+    });
+
+    // formating
+    const averageTemperatureByLocation = data.map((record) => ({
+      ...record,
+      _avg: {
+        ...record._avg,
+        t_amb: Number(record._avg.t_amb?.toFixed(2) ?? 0),
+        t_ref: Number(record._avg.t_ref?.toFixed(2) ?? 0),
+        t_sup_prim: Number(record._avg.t_sup_prim?.toFixed(2) ?? 0),
+        t_sup_sec: Number(record._avg.t_sup_sec?.toFixed(2) ?? 0),
+        t_ret_prim: Number(record._avg.t_ret_prim?.toFixed(2) ?? 0),
+        t_ret_sec: Number(record._avg.t_ret_sec?.toFixed(2) ?? 0),
+      },
+      _sum: {
+        e: Number(record._sum.e?.toFixed(2) ?? 0),
+      },
+      totalEnergy: Number(totalEnergy._sum.e?.toFixed(2) ?? 0),
+    }));
+
+    return averageTemperatureByLocation;
   }),
 });

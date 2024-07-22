@@ -7,6 +7,8 @@ import { api } from "@/trpc/react";
 import OverviewTemperatureDifference from "../overview-area-installed";
 import OverviewEnergyByLocation from "../overview-current-download";
 import OverviewEnergyConsumptionWidget from "../overview-energy-consumption-widget";
+import OverviewLocations from "../overview-locations";
+import OverviewRecentMeasurements from "../overview-recent-measurements";
 import OverviewWidgetSummary from "../overview-widget-summary";
 
 export default function HomeOverviewView() {
@@ -25,6 +27,12 @@ export default function HomeOverviewView() {
   const { data: monthTemperatureData, isLoading: isLoadingMonthTemperature } =
     api.measurement.getMonthTemperatureData.useQuery();
 
+  const { data: recentMeasurements, isLoading: isLoadingRecent } =
+    api.measurement.getRecent.useQuery();
+
+  const { data: avgTempByLocation, isLoading: isLoadingAvgTempByLocation } =
+    api.measurement.getAverageTemperatureByLocation.useQuery();
+  console.log({ avgTempByLocation });
   return (
     <Container maxWidth={settings.themeStretch ? false : "xl"}>
       <Grid container spacing={3}>
@@ -103,35 +111,38 @@ export default function HomeOverviewView() {
                     },
                   ],
                 })),
-                // series: [
-                //   {
-                //     year: "2019",
-                //     data: [
-                //       {
-                //         name: "Asia",
-                //         data: [10, 41, 35, 51, 49, 62, 69, 91, 148, 35, 51, 49],
-                //       },
-                //       {
-                //         name: "America",
-                //         data: [10, 34, 13, 56, 77, 88, 99, 77, 45, 13, 56, 77],
-                //       },
-                //     ],
-                //   },
-                //   {
-                //     year: "2020",
-                //     data: [
-                //       {
-                //         name: "Asia",
-                //         data: [51, 35, 41, 10, 91, 69, 62, 148, 91, 69, 62, 49],
-                //       },
-                //       {
-                //         name: "America",
-                //         data: [56, 13, 34, 10, 77, 99, 88, 45, 77, 99, 88, 77],
-                //       },
-                //     ],
-                //   },
-                // ],
               }}
+            />
+          )}
+        </Grid>
+
+        <Grid xs={12} lg={8} item>
+          {isLoadingRecent && !recentMeasurements && (
+            <Skeleton sx={{ width: "100%", height: "100%" }} />
+          )}
+          {!isLoadingRecent && recentMeasurements && (
+            <OverviewRecentMeasurements
+              title="The last 10 measurements in the system"
+              tableData={recentMeasurements}
+              tableLabels={[
+                { id: "date", label: "Date" },
+                { id: "time", label: "Time" },
+                { id: "location", label: "Location" },
+                { id: "energy", label: "Energy" },
+                { id: "power", label: "Power" },
+                { id: "" },
+              ]}
+            />
+          )}
+        </Grid>
+        <Grid xs={12} md={6} lg={4} item>
+          {isLoadingAvgTempByLocation && !avgTempByLocation && (
+            <Skeleton sx={{ width: "100%", height: "100%" }} />
+          )}
+          {!isLoadingAvgTempByLocation && avgTempByLocation && (
+            <OverviewLocations
+              title="Today's Average Temperatures by Location"
+              list={avgTempByLocation}
             />
           )}
         </Grid>
