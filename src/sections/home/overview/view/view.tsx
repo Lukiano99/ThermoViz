@@ -7,34 +7,36 @@ import { api } from "@/trpc/react";
 import OverviewTemperatureDifference from "../overview-area-installed";
 import OverviewEnergyByLocation from "../overview-current-download";
 import OverviewEnergyConsumptionWidget from "../overview-energy-consumption-widget";
+import OverviewLocations from "../overview-locations";
 import OverviewRecentMeasurements from "../overview-recent-measurements";
 import OverviewWidgetSummary from "../overview-widget-summary";
 
 export default function HomeOverviewView() {
   const settings = useSettingsContext();
 
-  // const { data: averageTemperatures, isLoading: isLoadingAverageTemperatures } =
-  //   api.measurement.averageAmbientTemperature.useQuery({
-  //     nDaysAgo: 5,
-  //   });
+  const { data: averageTemperatures, isLoading: isLoadingAverageTemperatures } =
+    api.measurement.averageAmbientTemperature.useQuery({
+      nDaysAgo: 5,
+    });
 
-  // const {
-  //   data: totalEnergyConsumptionByLocation,
-  //   isLoading: isLoadingByLocation,
-  // } = api.measurement.getTotalEnergyConsumptionByLocation.useQuery();
+  const {
+    data: totalEnergyConsumptionByLocation,
+    isLoading: isLoadingByLocation,
+  } = api.measurement.getTotalEnergyConsumptionByLocation.useQuery();
 
-  // const { data: monthTemperatureData, isLoading: isLoadingMonthTemperature } =
-  //   api.measurement.getMonthTemperatureData.useQuery();
+  const { data: monthTemperatureData, isLoading: isLoadingMonthTemperature } =
+    api.measurement.getMonthTemperatureData.useQuery();
 
   const { data: recentMeasurements, isLoading: isLoadingRecent } =
     api.measurement.getRecent.useQuery();
 
-  console.log({ recentMeasurements });
-
+  const { data: avgTempByLocation, isLoading: isLoadingAvgTempByLocation } =
+    api.measurement.getAverageTemperatureByLocation.useQuery();
+  console.log({ avgTempByLocation });
   return (
     <Container maxWidth={settings.themeStretch ? false : "xl"}>
       <Grid container spacing={3}>
-        {/* <Grid xs={12} md={4} item>
+        <Grid xs={12} md={4} item>
           <OverviewEnergyConsumptionWidget lastDays={7} UOM="MWh" />
         </Grid>
 
@@ -112,7 +114,7 @@ export default function HomeOverviewView() {
               }}
             />
           )}
-        </Grid> */}
+        </Grid>
 
         <Grid xs={12} lg={8} item>
           {isLoadingRecent && !recentMeasurements && (
@@ -130,6 +132,17 @@ export default function HomeOverviewView() {
                 { id: "power", label: "Power" },
                 { id: "" },
               ]}
+            />
+          )}
+        </Grid>
+        <Grid xs={12} md={6} lg={4} item>
+          {isLoadingAvgTempByLocation && !avgTempByLocation && (
+            <Skeleton sx={{ width: "100%", height: "100%" }} />
+          )}
+          {!isLoadingAvgTempByLocation && avgTempByLocation && (
+            <OverviewLocations
+              title="Today's Average Temperatures by Location"
+              list={avgTempByLocation}
             />
           )}
         </Grid>
