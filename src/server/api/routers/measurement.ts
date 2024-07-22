@@ -440,4 +440,32 @@ export const measurementRouter = createTRPCRouter({
 
     return monthTemperatureData;
   }),
+  // Vraća najnovija merenja
+  getRecent: protectedProcedure.query(async ({ ctx }) => {
+    const data = await ctx.db.measurement.findMany({
+      orderBy: {
+        datetime: "desc",
+      },
+      select: {
+        datetime: true,
+        location: true,
+        e: true,
+        pe: true,
+      },
+      take: 10, // Vraća 10 najnovijih merenja
+    });
+    if (!data) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: `Recent data is missing`,
+      });
+    }
+    return data.map((record) => ({
+      date: record.datetime.toLocaleDateString(),
+      time: record.datetime.toLocaleTimeString(),
+      location: record.location,
+      energy: record.e,
+      power: record.pe,
+    }));
+  }),
 });

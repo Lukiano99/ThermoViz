@@ -7,28 +7,34 @@ import { api } from "@/trpc/react";
 import OverviewTemperatureDifference from "../overview-area-installed";
 import OverviewEnergyByLocation from "../overview-current-download";
 import OverviewEnergyConsumptionWidget from "../overview-energy-consumption-widget";
+import OverviewRecentMeasurements from "../overview-recent-measurements";
 import OverviewWidgetSummary from "../overview-widget-summary";
 
 export default function HomeOverviewView() {
   const settings = useSettingsContext();
 
-  const { data: averageTemperatures, isLoading: isLoadingAverageTemperatures } =
-    api.measurement.averageAmbientTemperature.useQuery({
-      nDaysAgo: 5,
-    });
+  // const { data: averageTemperatures, isLoading: isLoadingAverageTemperatures } =
+  //   api.measurement.averageAmbientTemperature.useQuery({
+  //     nDaysAgo: 5,
+  //   });
 
-  const {
-    data: totalEnergyConsumptionByLocation,
-    isLoading: isLoadingByLocation,
-  } = api.measurement.getTotalEnergyConsumptionByLocation.useQuery();
+  // const {
+  //   data: totalEnergyConsumptionByLocation,
+  //   isLoading: isLoadingByLocation,
+  // } = api.measurement.getTotalEnergyConsumptionByLocation.useQuery();
 
-  const { data: monthTemperatureData, isLoading: isLoadingMonthTemperature } =
-    api.measurement.getMonthTemperatureData.useQuery();
+  // const { data: monthTemperatureData, isLoading: isLoadingMonthTemperature } =
+  //   api.measurement.getMonthTemperatureData.useQuery();
+
+  const { data: recentMeasurements, isLoading: isLoadingRecent } =
+    api.measurement.getRecent.useQuery();
+
+  console.log({ recentMeasurements });
 
   return (
     <Container maxWidth={settings.themeStretch ? false : "xl"}>
       <Grid container spacing={3}>
-        <Grid xs={12} md={4} item>
+        {/* <Grid xs={12} md={4} item>
           <OverviewEnergyConsumptionWidget lastDays={7} UOM="MWh" />
         </Grid>
 
@@ -104,6 +110,26 @@ export default function HomeOverviewView() {
                   ],
                 })),
               }}
+            />
+          )}
+        </Grid> */}
+
+        <Grid xs={12} lg={8} item>
+          {isLoadingRecent && !recentMeasurements && (
+            <Skeleton sx={{ width: "100%", height: "100%" }} />
+          )}
+          {!isLoadingRecent && recentMeasurements && (
+            <OverviewRecentMeasurements
+              title="The last 10 measurements in the system"
+              tableData={recentMeasurements}
+              tableLabels={[
+                { id: "date", label: "Date" },
+                { id: "time", label: "Time" },
+                { id: "location", label: "Location" },
+                { id: "energy", label: "Energy" },
+                { id: "power", label: "Power" },
+                { id: "" },
+              ]}
             />
           )}
         </Grid>
