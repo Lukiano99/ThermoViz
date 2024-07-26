@@ -52,8 +52,13 @@ const OverviewEnergyConsumptionWidget = ({
 
   return (
     <>
-      {isLoading && isLoadingECBD && (
-        <Skeleton sx={{ width: "100%", height: "100%" }} />
+      {(isLoading || isLoadingECBD) && (
+        <Skeleton
+          sx={{
+            width: "100%",
+            height: "150px",
+          }}
+        />
       )}
       {!isLoading && totalEnergyLastNDays && (
         <OverviewWidgetSummary
