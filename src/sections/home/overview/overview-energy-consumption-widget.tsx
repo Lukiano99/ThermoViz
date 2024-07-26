@@ -1,5 +1,5 @@
 "use client";
-import { Skeleton } from "@mui/material";
+import { Box, Skeleton } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
 import { api } from "@/trpc/react";
@@ -29,7 +29,7 @@ const OverviewEnergyConsumptionWidget = ({
   const widgetTitle =
     isError && failureReason
       ? failureReason.message
-      : `Total Energy Delivered in the last ${lastDays} days`;
+      : `Energy Delivered in the last ${lastDays} days`;
   const widgetPercent =
     !isLoading && isError && failureReason
       ? 0
@@ -51,13 +51,20 @@ const OverviewEnergyConsumptionWidget = ({
   const theme = useTheme();
 
   return (
-    <>
-      {isLoading && isLoadingECBD && (
-        <Skeleton sx={{ width: "100%", height: "100%" }} />
+    <Box sx={{ height: "100%", width: "100%" }}>
+      {(isLoading || isLoadingECBD) && (
+        <Skeleton
+          sx={{
+            width: "100%",
+            height: "100%",
+            minHeight: "150px",
+          }}
+        />
       )}
       {!isLoading && totalEnergyLastNDays && (
         <OverviewWidgetSummary
           title={widgetTitle}
+          sx={{ height: "100%" }}
           percent={widgetPercent}
           UOM={UOM}
           total={widgetTotal}
@@ -77,7 +84,7 @@ const OverviewEnergyConsumptionWidget = ({
           lastDays={lastDays}
         />
       )}
-    </>
+    </Box>
   );
 };
 

@@ -78,7 +78,7 @@ export default function OverviewTemperatureDifference({
 
   return (
     <>
-      <Card {...other}>
+      <Card {...other} sx={{ minHeight: "492px" }}>
         <CardHeader
           title={title}
           subheader={subheader}
