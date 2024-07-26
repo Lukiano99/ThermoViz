@@ -52,7 +52,7 @@ const OverviewEnergyConsumptionWidget = ({
 
   return (
     <Box sx={{ height: "100%", width: "100%" }}>
-      {(!isLoading || isLoadingECBD) && (
+      {(isLoading || isLoadingECBD) && (
         <Skeleton
           sx={{
             width: "100%",
@@ -61,7 +61,7 @@ const OverviewEnergyConsumptionWidget = ({
           }}
         />
       )}
-      {isLoading && totalEnergyLastNDays && (
+      {!isLoading && totalEnergyLastNDays && (
         <OverviewWidgetSummary
           title={widgetTitle}
           percent={widgetPercent}
