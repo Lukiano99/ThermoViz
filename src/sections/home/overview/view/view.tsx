@@ -44,9 +44,9 @@ export default function HomeOverviewView() {
           <OverviewEnergyConsumptionWidget lastDays={10} UOM="MWh" />
         </Grid>
 
-        <Grid xs={12} md={4} item>
+        <Grid xs={12} md={4} item sx={{ height: "100%", width: "100%" }}>
           {isLoadingAverageTemperatures && (
-            <Skeleton sx={{ width: "100%", height: "100%" }} />
+            <Skeleton sx={{ width: "100%", minHeight: "150px" }} />
           )}
           {!isLoadingAverageTemperatures && averageTemperatures && (
             <OverviewWidgetSummary
@@ -64,7 +64,7 @@ export default function HomeOverviewView() {
 
         <Grid xs={12} md={6} lg={4} item>
           {isLoadingByLocation && (
-            <Skeleton sx={{ width: "100%", height: "100%" }} />
+            <Skeleton sx={{ width: "100%", minHeight: "492px" }} />
           )}
           {!isLoadingByLocation && totalEnergyConsumptionByLocation && (
             <OverviewEnergyByLocation
@@ -82,7 +82,7 @@ export default function HomeOverviewView() {
 
         <Grid xs={12} md={6} lg={8} item>
           {isLoadingMonthTemperature && (
-            <Skeleton sx={{ width: "100%", height: "100%" }} />
+            <Skeleton sx={{ width: "100%", height: "492px" }} />
           )}
           {monthTemperatureData && (
             <OverviewTemperatureDifference
@@ -118,7 +118,7 @@ export default function HomeOverviewView() {
 
         <Grid xs={12} lg={8} item>
           {isLoadingRecent && !recentMeasurements && (
-            <Skeleton sx={{ width: "100%", height: "100%" }} />
+            <Skeleton sx={{ width: "100%", height: "492px" }} />
           )}
           {!isLoadingRecent && recentMeasurements && (
             <OverviewRecentMeasurements
@@ -137,7 +137,7 @@ export default function HomeOverviewView() {
         </Grid>
         <Grid xs={12} md={6} lg={4} item>
           {isLoadingAvgTempByLocation && !avgTempByLocation && (
-            <Skeleton sx={{ width: "100%", height: "100%" }} />
+            <Skeleton sx={{ width: "100%", height: "492px" }} />
           )}
           {!isLoadingAvgTempByLocation && avgTempByLocation && (
             <OverviewLocations

@@ -29,7 +29,7 @@ const OverviewEnergyConsumptionWidget = ({
   const widgetTitle =
     isError && failureReason
       ? failureReason.message
-      : `Total Energy Delivered in the last ${lastDays} days`;
+      : `Energy Delivered in the last ${lastDays} days`;
   const widgetPercent =
     !isLoading && isError && failureReason
       ? 0
@@ -64,6 +64,7 @@ const OverviewEnergyConsumptionWidget = ({
       {!isLoading && totalEnergyLastNDays && (
         <OverviewWidgetSummary
           title={widgetTitle}
+          sx={{ height: "100%" }}
           percent={widgetPercent}
           UOM={UOM}
           total={widgetTotal}

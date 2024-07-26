@@ -101,7 +101,7 @@ export default function OverviewEnergyByLocation({
   });
 
   return (
-    <Card {...other}>
+    <Card {...other} sx={{ minHeight: "492px" }}>
       <CardHeader title={title} subheader={subheader} sx={{ mb: 5 }} />
 
       <StyledChart
