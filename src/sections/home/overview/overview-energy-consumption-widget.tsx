@@ -1,5 +1,5 @@
 "use client";
-import { Skeleton } from "@mui/material";
+import { Box, Skeleton } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
 import { api } from "@/trpc/react";
@@ -51,16 +51,17 @@ const OverviewEnergyConsumptionWidget = ({
   const theme = useTheme();
 
   return (
-    <>
-      {(isLoading || isLoadingECBD) && (
+    <Box sx={{ height: "100%", width: "100%" }}>
+      {(!isLoading || isLoadingECBD) && (
         <Skeleton
           sx={{
             width: "100%",
-            height: "162px",
+            height: "100%",
+            minHeight: "150px",
           }}
         />
       )}
-      {!isLoading && totalEnergyLastNDays && (
+      {isLoading && totalEnergyLastNDays && (
         <OverviewWidgetSummary
           title={widgetTitle}
           percent={widgetPercent}
@@ -82,7 +83,7 @@ const OverviewEnergyConsumptionWidget = ({
           lastDays={lastDays}
         />
       )}
-    </>
+    </Box>
   );
 };
 
