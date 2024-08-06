@@ -13,6 +13,8 @@ import CustomPopover, { usePopover } from "src/components/custom-popover";
 import { useMockedUser } from "src/hooks/use-mocked-user";
 import { useRouter } from "src/routes/hooks";
 
+import { _mock } from "@/_mock";
+
 // ----------------------------------------------------------------------
 
 const OPTIONS = [
@@ -35,7 +37,8 @@ const OPTIONS = [
 export default function AccountPopover() {
   const router = useRouter();
 
-  const { user } = useMockedUser();
+  // const { user } = useMockedUser();
+  const { user } = useAuthContext();
 
   const { logout } = useAuthContext();
 
@@ -75,7 +78,7 @@ export default function AccountPopover() {
         }}
       >
         <Avatar
-          src={user?.photoURL}
+          src={_mock.image.avatar(24)}
           alt={user?.displayName}
           sx={{
             width: 36,

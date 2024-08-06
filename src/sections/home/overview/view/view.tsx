@@ -1,6 +1,7 @@
 "use client";
-import { Container, Grid, Skeleton } from "@mui/material";
+import { Container, Grid, Skeleton, Typography } from "@mui/material";
 
+import { useAuthContext } from "@/auth/hooks";
 import { useSettingsContext } from "@/components/settings";
 import { api } from "@/trpc/react";
 
@@ -32,9 +33,23 @@ export default function HomeOverviewView() {
 
   const { data: avgTempByLocation, isLoading: isLoadingAvgTempByLocation } =
     api.measurement.getAverageTemperatureByLocation.useQuery();
-  console.log({ avgTempByLocation });
+
+  const { user } = useAuthContext();
+
   return (
     <Container maxWidth={settings.themeStretch ? false : "xl"}>
+      {user?.displayName && (
+        <Typography
+          variant="h3"
+          sx={{
+            paddingBottom: 5,
+          }}
+        >
+          Welcome back,{" "}
+          {user.displayName !== "undefined" ? user.displayName : "User"} 👋
+        </Typography>
+      )}
+
       <Grid container spacing={3}>
         <Grid xs={12} md={4} item>
           <OverviewEnergyConsumptionWidget lastDays={7} UOM="MWh" />
