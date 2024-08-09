@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { endOfDay, format, startOfDay, subDays } from "date-fns";
+import { endOfDay, endOfMonth, format, startOfDay, startOfMonth, subDays } from "date-fns";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
@@ -579,5 +579,69 @@ export const measurementRouter = createTRPCRouter({
     );
   
     return formattedMonths as Month[];
+  }),
+  getEnergyAndAmbientTemperatureData: protectedProcedure.input(z.object({
+    month: z.string()
+  })).query( async ({ctx, input}) => {
+
+
+    const { month } = input;
+    
+    // Map month name to month index
+    const monthMap: { [key: string]: number } = {
+      january: 0,
+      february: 1,
+      march: 2,
+      april: 3,
+      may: 4,
+      june: 5,
+      july: 6,
+      august: 7,
+      september: 8,
+      october: 9,
+      november: 10,
+      december: 11,
+    };
+
+    const monthIndex = monthMap[month.toLowerCase()];
+
+    if (monthIndex === undefined) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: `Invalid month name provided: ${month}`,
+      });
+    }
+
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+
+    const startOfSelectedMonth = startOfMonth(new Date(currentYear, monthIndex));
+    const endOfSelectedMonth = endOfMonth(new Date(currentYear, monthIndex));
+
+    const energyAndAmbientTemperatureData: {
+      energy: number;
+      t_amb: number;
+    }[] = await ctx.db.$queryRaw`SELECT
+    ROUND((SUM(e)::numeric)/1000, 2) AS energy,
+    ROUND(AVG(t_amb)::numeric, 2) AS t_amb
+  FROM
+    "Measurement"
+  WHERE
+    datetime >= ${startOfSelectedMonth} AND datetime <= ${endOfSelectedMonth}
+  GROUP BY
+    DATE_TRUNC('day', datetime)
+  ORDER BY
+    DATE_TRUNC('day', datetime);`;
+
+    if (!energyAndAmbientTemperatureData) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: `Energy and ambient temperature data is missing for the month of ${month}.`,
+      });
+    }
+    console.log({energyAndAmbientTemperatureData})
+    return energyAndAmbientTemperatureData;
+
+
   })
 });

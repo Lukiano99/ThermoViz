@@ -7,7 +7,6 @@ import { alpha } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import { useSettingsContext } from "src/components/settings";
 
-import OverviewTemperatureDifference from "@/sections/home/overview/overview-temperature-difference";
 import { api } from "@/trpc/react";
 
 import AnalyticsEnergyTemperature from "../analytics-energy-temperature";
@@ -24,28 +23,6 @@ export default function OneView() {
   });
   // console.log({ energyAndTemperatureData });
 
-  const generateRoundedArray = (inputArray: number[]) => {
-    if (inputArray.length === 0) {
-      throw new Error("Input array must not be empty");
-    }
-
-    const min = Math.min(...inputArray);
-    const max = Math.max(...inputArray);
-
-    const step = (max - min) / 9; // We divide by 9 to create 10 evenly spaced steps
-
-    const roundedStep = Math.round(step / 5) * 5; // Round to the nearest 5
-
-    const resultArray = [];
-    for (let i = 0; i < 10; i++) {
-      resultArray.push(Math.round((min + i * roundedStep) / 5) * 5);
-    }
-
-    // Ensure the last element is the maximum value, rounded to the nearest 5
-    resultArray[9] = Math.round(max / 5) * 5;
-
-    return resultArray;
-  };
   return (
     <Container maxWidth={settings.themeStretch ? false : "xl"}>
       <Grid xs={12} md={6} lg={8} item>
