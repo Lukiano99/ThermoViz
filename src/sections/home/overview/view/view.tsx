@@ -11,13 +11,14 @@ import OverviewEnergyConsumptionWidget from "../overview-energy-consumption-widg
 import OverviewLocations from "../overview-locations";
 import OverviewRecentMeasurements from "../overview-recent-measurements";
 import OverviewWidgetSummary from "../overview-widget-summary";
+import { useState } from "react";
 
 export default function HomeOverviewView() {
   const settings = useSettingsContext();
-
+  const [chartMonth, setChartMonth] = useState<number | undefined>();
   const { data: averageTemperatures, isLoading: isLoadingAverageTemperatures } =
     api.measurement.averageAmbientTemperature.useQuery({
-      nDaysAgo: 5,
+      nDaysAgo: 5, // must be equals to month in chart
     });
 
   const {
@@ -26,7 +27,10 @@ export default function HomeOverviewView() {
   } = api.measurement.getTotalEnergyConsumptionByLocation.useQuery();
 
   const { data: monthTemperatureData, isLoading: isLoadingMonthTemperature } =
-    api.measurement.getMonthTemperatureData.useQuery();
+    api.measurement.getMonthTemperatureData.useQuery({
+      month: chartMonth ?? 4,
+      // month: 3,
+    });
 
   const { data: recentMeasurements, isLoading: isLoadingRecent } =
     api.measurement.getRecent.useQuery();
@@ -35,7 +39,7 @@ export default function HomeOverviewView() {
     api.measurement.getAverageTemperatureByLocation.useQuery();
 
   const { user } = useAuthContext();
-
+  console.log({ monthTemperatureData });
   return (
     <Container maxWidth={settings.themeStretch ? false : "xl"}>
       {user?.displayName && (
@@ -79,7 +83,12 @@ export default function HomeOverviewView() {
 
         <Grid xs={12} md={6} lg={4} item>
           {isLoadingByLocation && (
-            <Skeleton sx={{ width: "100%", minHeight: "492px" }} />
+            <Skeleton
+              sx={{
+                width: "100%",
+                minHeight: "492px",
+              }}
+            />
           )}
           {!isLoadingByLocation && totalEnergyConsumptionByLocation && (
             <OverviewEnergyByLocation
@@ -101,6 +110,8 @@ export default function HomeOverviewView() {
           )}
           {monthTemperatureData && (
             <OverviewTemperatureDifference
+              onMonthChange={(month) => setChartMonth(month)}
+              month={chartMonth}
               title="Supply & Return in °C"
               subheader="Temperature difference between primary supply and return in the primary circuit"
               chart={{
@@ -115,13 +126,13 @@ export default function HomeOverviewView() {
                     {
                       name: "Supply T  in the Primary Circuit",
                       data: monthTemperatureData
-                        .filter((monthData) => monthData.month === month)
+                        // .filter((monthData) => monthData.month === month)
                         .map((finalData) => finalData.average_t_sup_prim),
                     },
                     {
                       name: "Return T  in the Primary Circuit",
                       data: monthTemperatureData
-                        .filter((monthData) => monthData.month === month)
+                        // .filter((monthData) => monthData.month === month)
                         .map((finalData) => finalData.average_t_ret_prim),
                     },
                   ],

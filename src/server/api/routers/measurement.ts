@@ -7,7 +7,25 @@ type EnergyPerDay = {
   date: string;
   total_energy: number;
 };
+export type Month =
+  | "january"
+  | "february"
+  | "march"
+  | "april"
+  | "may"
+  | "june"
+  | "july"
+  | "august"
+  | "september"
+  | "october"
+  | "november"
+  | "december";
 
+// Function to map month numbers to month names
+const monthNames: Month[] = [
+  "january", "february", "march", "april", "may", "june",
+  "july", "august", "september", "october", "november", "december"
+];
 export const measurementRouter = createTRPCRouter({
   // // Vraća sve merenja
   // list: protectedProcedure.query(async ({ ctx }) => {
@@ -385,30 +403,35 @@ export const measurementRouter = createTRPCRouter({
     },
   ),
 
-  getMonthTemperatureData: protectedProcedure.query(async ({ ctx }) => {
+  getMonthTemperatureData: protectedProcedure
+  .input(z.object({
+    month: z.number()
+  }))
+  .query(async ({ ctx, input }) => {
     // za N meseca unazad
-    const nMonthsAgo = 2;
+    const nMonthsAgo = 0;
     // const currentDate = new Date();
     const currentDate = startOfDay(new Date(2024, 4, 24));
 
     const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth() + 1; // Months are 0-indexed in JavaScript
+    // const currentMonth = currentDate.getMonth() + 1; // Months are 0-indexed in JavaScript
+    const currentMonth = input.month;
 
     const startOfCurrentMonth = new Date(
       currentYear,
       currentMonth - nMonthsAgo,
       2,
     );
-    const endOfCurrentMonth = new Date(currentYear, currentMonth, 0);
+    const endOfCurrentMonth = new Date(currentYear, currentMonth + 1, 1);
 
     const monthTemperatureData: {
-      month: string;
+      month: Month;
       day: Date;
       average_t_sup_prim: number;
       average_t_ret_prim: number;
     }[] = await ctx.db.$queryRaw`
     SELECT
-    TRIM(TO_CHAR(DATE_TRUNC('day', datetime), 'Month')) AS month,
+    LOWER(TRIM(TO_CHAR(DATE_TRUNC('day', datetime), 'Month'))) AS month,
     DATE_TRUNC('day', datetime) AS day,
     ROUND(AVG(t_sup_prim)::numeric, 2) AS average_t_sup_prim,
     ROUND(AVG(t_ret_prim)::numeric, 2) AS average_t_ret_prim
@@ -427,6 +450,10 @@ export const measurementRouter = createTRPCRouter({
         message: `Month temperature data is missing. Something went wrong`,
       });
     }
+    
+    console.log({startOfCurrentMonth});
+    console.log({endOfCurrentMonth});
+    console.log({monthTemperatureData});
 
     return monthTemperatureData;
   }),
@@ -525,4 +552,32 @@ export const measurementRouter = createTRPCRouter({
 
     return averageTemperatureByLocation;
   }),
+  getDistinctMonths: protectedProcedure.query(async ({ ctx }) => {
+    const distinctMonths = await ctx.db.measurement.findMany({
+      select: {
+        datetime: true,
+      },
+      distinct: ['datetime'],
+      orderBy: {
+        datetime: 'asc',
+      },
+    });
+  
+    if (!distinctMonths) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: `No distinct months found in the database.`,
+      });
+    }
+  
+    const formattedMonths = Array.from(
+      new Set(distinctMonths.map(record => {
+        const date = new Date(record.datetime);
+        const month = date.getMonth(); // getMonth returns 0-11
+        return monthNames[month];
+      }))
+    );
+  
+    return formattedMonths as Month[];
+  })
 });
