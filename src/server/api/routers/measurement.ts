@@ -1,5 +1,12 @@
 import { TRPCError } from "@trpc/server";
-import { endOfDay, endOfMonth, format, startOfDay, startOfMonth, subDays } from "date-fns";
+import {
+  endOfDay,
+  endOfMonth,
+  format,
+  startOfDay,
+  startOfMonth,
+  subDays,
+} from "date-fns";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
@@ -23,8 +30,18 @@ export type Month =
 
 // Function to map month numbers to month names
 const monthNames: Month[] = [
-  "january", "february", "march", "april", "may", "june",
-  "july", "august", "september", "october", "november", "december"
+  "january",
+  "february",
+  "march",
+  "april",
+  "may",
+  "june",
+  "july",
+  "august",
+  "september",
+  "october",
+  "november",
+  "december",
 ];
 export const measurementRouter = createTRPCRouter({
   // // Vraća sve merenja
@@ -404,32 +421,34 @@ export const measurementRouter = createTRPCRouter({
   ),
 
   getMonthTemperatureData: protectedProcedure
-  .input(z.object({
-    month: z.number()
-  }))
-  .query(async ({ ctx, input }) => {
-    // za N meseca unazad
-    const nMonthsAgo = 0;
-    // const currentDate = new Date();
-    const currentDate = startOfDay(new Date(2024, 4, 24));
+    .input(
+      z.object({
+        month: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      // za N meseca unazad
+      const nMonthsAgo = 0;
+      // const currentDate = new Date();
+      const currentDate = startOfDay(new Date(2024, 4, 24));
 
-    const currentYear = currentDate.getFullYear();
-    // const currentMonth = currentDate.getMonth() + 1; // Months are 0-indexed in JavaScript
-    const currentMonth = input.month;
+      const currentYear = currentDate.getFullYear();
+      // const currentMonth = currentDate.getMonth() + 1; // Months are 0-indexed in JavaScript
+      const currentMonth = input.month;
 
-    const startOfCurrentMonth = new Date(
-      currentYear,
-      currentMonth - nMonthsAgo,
-      2,
-    );
-    const endOfCurrentMonth = new Date(currentYear, currentMonth + 1, 1);
+      const startOfCurrentMonth = new Date(
+        currentYear,
+        currentMonth - nMonthsAgo,
+        2,
+      );
+      const endOfCurrentMonth = new Date(currentYear, currentMonth + 1, 1);
 
-    const monthTemperatureData: {
-      month: Month;
-      day: Date;
-      average_t_sup_prim: number;
-      average_t_ret_prim: number;
-    }[] = await ctx.db.$queryRaw`
+      const monthTemperatureData: {
+        month: Month;
+        day: Date;
+        average_t_sup_prim: number;
+        average_t_ret_prim: number;
+      }[] = await ctx.db.$queryRaw`
     SELECT
     LOWER(TRIM(TO_CHAR(DATE_TRUNC('day', datetime), 'Month'))) AS month,
     DATE_TRUNC('day', datetime) AS day,
@@ -444,19 +463,19 @@ export const measurementRouter = createTRPCRouter({
     ORDER BY
     day;
     `;
-    if (!monthTemperatureData) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: `Month temperature data is missing. Something went wrong`,
-      });
-    }
-    
-    console.log({startOfCurrentMonth});
-    console.log({endOfCurrentMonth});
-    console.log({monthTemperatureData});
+      if (!monthTemperatureData) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Month temperature data is missing. Something went wrong`,
+        });
+      }
 
-    return monthTemperatureData;
-  }),
+      console.log({ startOfCurrentMonth });
+      console.log({ endOfCurrentMonth });
+      console.log({ monthTemperatureData });
+
+      return monthTemperatureData;
+    }),
   // Vraća najnovija merenja
   getRecent: protectedProcedure.query(async ({ ctx }) => {
     const data = await ctx.db.measurement.findMany({
@@ -557,71 +576,77 @@ export const measurementRouter = createTRPCRouter({
       select: {
         datetime: true,
       },
-      distinct: ['datetime'],
+      distinct: ["datetime"],
       orderBy: {
-        datetime: 'asc',
+        datetime: "asc",
       },
     });
-  
+
     if (!distinctMonths) {
       throw new TRPCError({
         code: "NOT_FOUND",
         message: `No distinct months found in the database.`,
       });
     }
-  
+
     const formattedMonths = Array.from(
-      new Set(distinctMonths.map(record => {
-        const date = new Date(record.datetime);
-        const month = date.getMonth(); // getMonth returns 0-11
-        return monthNames[month];
-      }))
+      new Set(
+        distinctMonths.map((record) => {
+          const date = new Date(record.datetime);
+          const month = date.getMonth(); // getMonth returns 0-11
+          return monthNames[month];
+        }),
+      ),
     );
-  
+
     return formattedMonths as Month[];
   }),
-  getEnergyAndAmbientTemperatureData: protectedProcedure.input(z.object({
-    month: z.string()
-  })).query( async ({ctx, input}) => {
+  getEnergyAndAmbientTemperatureData: protectedProcedure
+    .input(
+      z.object({
+        month: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { month } = input;
 
+      // Map month name to month index
+      const monthMap: Record<string, number> = {
+        january: 0,
+        february: 1,
+        march: 2,
+        april: 3,
+        may: 4,
+        june: 5,
+        july: 6,
+        august: 7,
+        september: 8,
+        october: 9,
+        november: 10,
+        december: 11,
+      };
 
-    const { month } = input;
-    
-    // Map month name to month index
-    const monthMap: { [key: string]: number } = {
-      january: 0,
-      february: 1,
-      march: 2,
-      april: 3,
-      may: 4,
-      june: 5,
-      july: 6,
-      august: 7,
-      september: 8,
-      october: 9,
-      november: 10,
-      december: 11,
-    };
+      const monthIndex = monthMap[month.toLowerCase()];
 
-    const monthIndex = monthMap[month.toLowerCase()];
+      if (monthIndex === undefined) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Invalid month name provided: ${month}`,
+        });
+      }
 
-    if (monthIndex === undefined) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: `Invalid month name provided: ${month}`,
-      });
-    }
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
 
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
+      const startOfSelectedMonth = startOfMonth(
+        new Date(currentYear, monthIndex),
+      );
+      const endOfSelectedMonth = endOfMonth(new Date(currentYear, monthIndex));
 
-    const startOfSelectedMonth = startOfMonth(new Date(currentYear, monthIndex));
-    const endOfSelectedMonth = endOfMonth(new Date(currentYear, monthIndex));
-
-    const energyAndAmbientTemperatureData: {
-      energy: number;
-      t_amb: number;
-    }[] = await ctx.db.$queryRaw`SELECT
+      const energyAndAmbientTemperatureData: {
+        energy: number;
+        t_amb: number;
+      }[] = await ctx.db.$queryRaw`SELECT
     ROUND((SUM(e)::numeric)/1000, 2) AS energy,
     ROUND(AVG(t_amb)::numeric, 2) AS t_amb
   FROM
@@ -633,15 +658,13 @@ export const measurementRouter = createTRPCRouter({
   ORDER BY
     DATE_TRUNC('day', datetime);`;
 
-    if (!energyAndAmbientTemperatureData) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: `Energy and ambient temperature data is missing for the month of ${month}.`,
-      });
-    }
-    console.log({energyAndAmbientTemperatureData})
-    return energyAndAmbientTemperatureData;
-
-
-  })
+      if (!energyAndAmbientTemperatureData) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Energy and ambient temperature data is missing for the month of ${month}.`,
+        });
+      }
+      console.log({ energyAndAmbientTemperatureData });
+      return energyAndAmbientTemperatureData;
+    }),
 });

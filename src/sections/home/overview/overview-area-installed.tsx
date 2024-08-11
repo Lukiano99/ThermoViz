@@ -9,10 +9,9 @@ import { type ApexOptions } from "apexcharts";
 import Chart, { useChart } from "src/components/chart";
 import CustomPopover, { usePopover } from "src/components/custom-popover";
 import Iconify from "src/components/iconify";
+
+import { type Month } from "@/server/api/routers/measurement";
 import { api } from "@/trpc/react";
-import { Month } from "@/server/api/routers/measurement";
-import { popover } from "@/theme/overrides/components/popover";
-import { Skeleton } from "@mui/material";
 
 // ----------------------------------------------------------------------
 
@@ -89,7 +88,7 @@ export default function OverviewTemperatureDifference({
     if (availableMonths) {
       setSeriesData(availableMonths[0] ?? "april");
     }
-  }, []);
+  }, [availableMonths]);
 
   const chartOptions = useChart({
     colors: colors.map((colr) => colr[1]),
@@ -145,7 +144,7 @@ export default function OverviewTemperatureDifference({
         }
       }
     },
-    [popover],
+    [popover, onMonthChange],
   );
 
   return (
@@ -166,8 +165,8 @@ export default function OverviewTemperatureDifference({
                 bgcolor: "background.neutral",
               }}
             >
-              {seriesData && seriesData[0]?.toString().toUpperCase()}
-              {seriesData && seriesData.toString().substring(1)}
+              {seriesData?.[0]?.toString().toUpperCase()}
+              {seriesData?.toString().substring(1)}
 
               <Iconify
                 width={16}
