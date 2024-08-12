@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import Card, { type CardProps } from "@mui/material/Card";
@@ -10,11 +10,15 @@ import Chart, { useChart } from "src/components/chart";
 import CustomPopover, { usePopover } from "src/components/custom-popover";
 import Iconify from "src/components/iconify";
 
+import { api } from "@/trpc/react";
+
 // ----------------------------------------------------------------------
 
 interface Props extends CardProps {
   title?: string;
   subheader?: string;
+  onMonthChange?: (month: string) => void;
+  month: string;
   chart: {
     categories?: string[];
     colors?: string[][];
@@ -29,14 +33,17 @@ interface Props extends CardProps {
   };
 }
 
-export default function AnalyticsEnergyTemperature({
+export default function OverviewTemperatureDifference({
   title,
   subheader,
   chart,
+  onMonthChange,
+  month,
   ...other
 }: Props) {
   const theme = useTheme();
-
+  const { data: availableMonths, isLoading: isLoadingMonths } =
+    api.measurement.getDistinctMonths.useQuery();
   const {
     colors = [
       [theme.palette.primary.light, theme.palette.primary.main],
@@ -49,26 +56,19 @@ export default function AnalyticsEnergyTemperature({
 
   const popover = usePopover();
 
-  const [seriesData, setSeriesData] = useState("April");
+  const [seriesData, setSeriesData] = useState(month);
+  useEffect(() => {
+    if (availableMonths) {
+      setSeriesData(availableMonths[0] ?? "april");
+    }
+  }, [availableMonths]);
 
   const chartOptions = useChart({
     colors: colors.map((colr) => colr[1]),
-    fill: {
-      // type: "gradient",
-      // gradient: {
-      //   colorStops: colors.map((colr) => [
-      //     { offset: 0, color: colr[0], opacity: 1 },
-      //     { offset: 100, color: colr[1], opacity: 1 },
-      //   ]),
-      // },
-    },
+    fill: {},
     xaxis: {
       categories,
-      title: {
-        text: "Energy [KWh]",
-      },
     },
-
     ...options,
   });
 
@@ -76,8 +76,11 @@ export default function AnalyticsEnergyTemperature({
     (newValue: string) => {
       popover.onClose();
       setSeriesData(newValue);
+      if (onMonthChange) {
+        onMonthChange(newValue);
+      }
     },
-    [popover],
+    [popover, onMonthChange],
   );
 
   return (
@@ -98,7 +101,8 @@ export default function AnalyticsEnergyTemperature({
                 bgcolor: "background.neutral",
               }}
             >
-              {seriesData}
+              {seriesData?.[0]?.toString().toUpperCase()}
+              {seriesData?.toString().substring(1)}
 
               <Iconify
                 width={16}
@@ -113,9 +117,9 @@ export default function AnalyticsEnergyTemperature({
           }
         />
 
-        {series.map((item, idx) => (
-          <Box key={idx} sx={{ mt: 3, mx: 3 }}>
-            {item.month === seriesData && (
+        {series.map((item) => (
+          <Box key={item.month} sx={{ mt: 3, mx: 3 }}>
+            {item.month.toLocaleLowerCase() === seriesData && (
               <Chart
                 dir="ltr"
                 type="line"
@@ -129,21 +133,24 @@ export default function AnalyticsEnergyTemperature({
         ))}
       </Card>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        sx={{ width: 140 }}
-      >
-        {series.map((option, idx) => (
-          <MenuItem
-            key={idx}
-            selected={option.month === seriesData}
-            onClick={() => handleChangeSeries(option.month)}
-          >
-            {option.month}
-          </MenuItem>
-        ))}
-      </CustomPopover>
+      {availableMonths && !isLoadingMonths && (
+        <CustomPopover
+          open={popover.open}
+          onClose={popover.onClose}
+          sx={{ width: 140 }}
+        >
+          {availableMonths.map((month) => (
+            <MenuItem
+              key={month}
+              selected={month === seriesData}
+              onClick={() => handleChangeSeries(month)}
+            >
+              {month[0]?.toUpperCase()}
+              {month.substring(1)}
+            </MenuItem>
+          ))}
+        </CustomPopover>
+      )}
     </>
   );
 }

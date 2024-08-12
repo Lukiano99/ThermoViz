@@ -423,10 +423,37 @@ export const measurementRouter = createTRPCRouter({
   getMonthTemperatureData: protectedProcedure
     .input(
       z.object({
-        month: z.number(),
+        month: z.string(),
       }),
     )
     .query(async ({ ctx, input }) => {
+      const { month } = input;
+
+      // Map month name to month index
+      const monthMap: Record<string, number> = {
+        january: 0,
+        february: 1,
+        march: 2,
+        april: 3,
+        may: 4,
+        june: 5,
+        july: 6,
+        august: 7,
+        september: 8,
+        october: 9,
+        november: 10,
+        december: 11,
+      };
+
+      const monthIndex = monthMap[month.toLowerCase()];
+
+      if (monthIndex === undefined) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Invalid month name provided: ${month}`,
+        });
+      }
+
       // za N meseca unazad
       const nMonthsAgo = 0;
       // const currentDate = new Date();
@@ -434,13 +461,20 @@ export const measurementRouter = createTRPCRouter({
 
       const currentYear = currentDate.getFullYear();
       // const currentMonth = currentDate.getMonth() + 1; // Months are 0-indexed in JavaScript
-      const currentMonth = input.month;
+      const currentMonth = monthIndex;
 
-      const startOfCurrentMonth = new Date(
-        currentYear,
-        currentMonth - nMonthsAgo,
-        2,
+      // const startOfCurrentMonth = new Date(
+      //   currentYear,
+      //   currentMonth - nMonthsAgo,
+      //   2,
+      // );
+
+      const startOfCurrentMonth = startOfMonth(
+        new Date(currentYear, currentMonth - nMonthsAgo + 1),
       );
+      startOfCurrentMonth.setUTCDate(1);
+      startOfCurrentMonth.setUTCHours(0, 0, 0, 0);
+
       const endOfCurrentMonth = new Date(currentYear, currentMonth + 1, 1);
 
       const monthTemperatureData: {
@@ -639,16 +673,19 @@ export const measurementRouter = createTRPCRouter({
       const currentYear = currentDate.getFullYear();
 
       const startOfSelectedMonth = startOfMonth(
-        new Date(currentYear, monthIndex),
+        new Date(currentYear, monthIndex + 1),
       );
+      startOfSelectedMonth.setUTCDate(1);
+      startOfSelectedMonth.setUTCHours(0, 0, 0, 0);
       const endOfSelectedMonth = endOfMonth(new Date(currentYear, monthIndex));
-
+      console.log({ startOfSelectedMonth });
       const energyAndAmbientTemperatureData: {
         energy: number;
         t_amb: number;
       }[] = await ctx.db.$queryRaw`SELECT
     ROUND((SUM(e)::numeric)/1000, 2) AS energy,
-    ROUND(AVG(t_amb)::numeric, 2) AS t_amb
+    ROUND(AVG(t_amb)::numeric, 2) AS t_amb,
+    DATE_TRUNC('day', datetime) AS day    
   FROM
     "Measurement"
   WHERE

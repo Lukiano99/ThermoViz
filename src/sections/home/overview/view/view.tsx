@@ -1,24 +1,24 @@
 "use client";
+import { useState } from "react";
 import { Container, Grid, Skeleton, Typography } from "@mui/material";
 
 import { useAuthContext } from "@/auth/hooks";
 import { useSettingsContext } from "@/components/settings";
 import { api } from "@/trpc/react";
 
-import OverviewTemperatureDifference from "../overview-area-installed";
 import OverviewEnergyByLocation from "../overview-current-download";
 import OverviewEnergyConsumptionWidget from "../overview-energy-consumption-widget";
 import OverviewLocations from "../overview-locations";
 import OverviewRecentMeasurements from "../overview-recent-measurements";
+import OverviewTemperatureDifference from "../overview-temperature-difference";
 import OverviewWidgetSummary from "../overview-widget-summary";
-import { useState } from "react";
 
 export default function HomeOverviewView() {
   const settings = useSettingsContext();
-  const [chartMonth, setChartMonth] = useState<number | undefined>();
+  const [chartMonth, setChartMonth] = useState("april");
   const { data: averageTemperatures, isLoading: isLoadingAverageTemperatures } =
     api.measurement.averageAmbientTemperature.useQuery({
-      nDaysAgo: 5, // must be equals to month in chart
+      nDaysAgo: 5,
     });
 
   const {
@@ -28,8 +28,7 @@ export default function HomeOverviewView() {
 
   const { data: monthTemperatureData, isLoading: isLoadingMonthTemperature } =
     api.measurement.getMonthTemperatureData.useQuery({
-      month: chartMonth ?? 4,
-      // month: 3,
+      month: chartMonth,
     });
 
   const { data: recentMeasurements, isLoading: isLoadingRecent } =

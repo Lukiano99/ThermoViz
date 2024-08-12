@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import Card, { type CardProps } from "@mui/material/Card";
@@ -10,7 +10,6 @@ import Chart, { useChart } from "src/components/chart";
 import CustomPopover, { usePopover } from "src/components/custom-popover";
 import Iconify from "src/components/iconify";
 
-import { type Month } from "@/server/api/routers/measurement";
 import { api } from "@/trpc/react";
 
 // ----------------------------------------------------------------------
@@ -18,8 +17,8 @@ import { api } from "@/trpc/react";
 interface Props extends CardProps {
   title?: string;
   subheader?: string;
-  onMonthChange?: (month: number) => void;
-  month: number | undefined;
+  onMonthChange?: (month: string) => void;
+  month: string;
   chart: {
     categories?: string[];
     colors?: string[][];
@@ -34,12 +33,12 @@ interface Props extends CardProps {
   };
 }
 
-export default function OverviewTemperatureDifference({
+export default function AnalyticsEnergyTemperature({
   title,
   subheader,
   chart,
-  onMonthChange,
   month,
+  onMonthChange,
   ...other
 }: Props) {
   const theme = useTheme();
@@ -57,91 +56,35 @@ export default function OverviewTemperatureDifference({
 
   const popover = usePopover();
 
-  const [seriesData, setSeriesData] = useState<Month>(
-    month === 0
-      ? "january"
-      : month === 1
-        ? "february"
-        : month === 2
-          ? "march"
-          : month === 3
-            ? "april"
-            : month === 4
-              ? "may"
-              : month === 5
-                ? "june"
-                : month === 6
-                  ? "july"
-                  : month === 7
-                    ? "august"
-                    : month === 8
-                      ? "september"
-                      : month === 9
-                        ? "october"
-                        : month === 10
-                          ? "november"
-                          : month === 11
-                            ? "december"
-                            : "may",
-  );
-  useEffect(() => {
-    if (availableMonths) {
-      setSeriesData(availableMonths[0] ?? "april");
-    }
-  }, [availableMonths]);
+  const [seriesData, setSeriesData] = useState(month);
 
   const chartOptions = useChart({
     colors: colors.map((colr) => colr[1]),
-    fill: {},
+    fill: {
+      // type: "gradient",
+      // gradient: {
+      //   colorStops: colors.map((colr) => [
+      //     { offset: 0, color: colr[0], opacity: 1 },
+      //     { offset: 100, color: colr[1], opacity: 1 },
+      //   ]),
+      // },
+    },
     xaxis: {
       categories,
+      title: {
+        text: "Energy [KWh]",
+      },
     },
+
     ...options,
   });
 
   const handleChangeSeries = useCallback(
-    (newValue: Month) => {
+    (newValue: string) => {
       popover.onClose();
       setSeriesData(newValue);
       if (onMonthChange) {
-        switch (newValue) {
-          case "january":
-            onMonthChange(0);
-            break;
-          case "february":
-            onMonthChange(1);
-            break;
-          case "march":
-            onMonthChange(2);
-            break;
-          case "april":
-            onMonthChange(3);
-            break;
-          case "may":
-            onMonthChange(4);
-            break;
-          case "june":
-            onMonthChange(5);
-            break;
-          case "july":
-            onMonthChange(6);
-            break;
-          case "august":
-            onMonthChange(7);
-            break;
-          case "september":
-            onMonthChange(8);
-            break;
-          case "october":
-            onMonthChange(9);
-            break;
-          case "november":
-            onMonthChange(10);
-            break;
-          case "december":
-            onMonthChange(11);
-            break;
-        }
+        onMonthChange(newValue);
       }
     },
     [popover, onMonthChange],
