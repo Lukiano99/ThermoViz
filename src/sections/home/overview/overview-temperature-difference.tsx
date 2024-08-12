@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import Card, { type CardProps } from "@mui/material/Card";
@@ -57,11 +57,6 @@ export default function OverviewTemperatureDifference({
   const popover = usePopover();
 
   const [seriesData, setSeriesData] = useState(month);
-  useEffect(() => {
-    if (availableMonths) {
-      setSeriesData(availableMonths[0] ?? "april");
-    }
-  }, [availableMonths]);
 
   const chartOptions = useChart({
     colors: colors.map((colr) => colr[1]),

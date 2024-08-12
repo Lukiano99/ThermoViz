@@ -75,6 +75,11 @@ export default function AnalyticsEnergyTemperature({
         text: "Energy [KWh]",
       },
     },
+    yaxis: {
+      title: {
+        text: "Temperature [°C]",
+      },
+    },
 
     ...options,
   });
