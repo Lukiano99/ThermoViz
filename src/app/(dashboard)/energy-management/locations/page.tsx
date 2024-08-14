@@ -1,4 +1,4 @@
-import OneView from "@/sections/one/view/view";
+import LocationsView from "@/sections/energy-management/locations/view/view";
 
 // ----------------------------------------------------------------------
 
@@ -7,5 +7,5 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <OneView />;
+  return <LocationsView />;
 }

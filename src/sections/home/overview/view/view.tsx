@@ -11,7 +11,6 @@ import OverviewEnergyByLocation from "../overview-current-download";
 import OverviewEnergyConsumptionWidget from "../overview-energy-consumption-widget";
 import OverviewLocations from "../overview-locations";
 import OverviewRecentMeasurements from "../overview-recent-measurements";
-import OverviewTemperatureDifference from "../overview-temperature-difference";
 import OverviewWidgetSummary from "../overview-widget-summary";
 
 export default function HomeOverviewView() {
@@ -27,10 +26,6 @@ export default function HomeOverviewView() {
     isLoading: isLoadingByLocation,
   } = api.measurement.getTotalEnergyConsumptionByLocation.useQuery();
 
-  const { data: monthTemperatureData, isLoading: isLoadingMonthTemperature } =
-    api.measurement.getMonthTemperatureData.useQuery({
-      month: chartMonth,
-    });
   const {
     data: energyAndTemperatureData,
     isLoading: isLoadingEnergyAndTemperatureData,
@@ -44,7 +39,6 @@ export default function HomeOverviewView() {
     api.measurement.getAverageTemperatureByLocation.useQuery();
 
   const { user } = useAuthContext();
-  console.log({ monthTemperatureData });
   return (
     <Container maxWidth={settings.themeStretch ? false : "xl"}>
       {user?.displayName && (

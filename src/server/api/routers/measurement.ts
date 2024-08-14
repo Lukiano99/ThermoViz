@@ -504,10 +504,6 @@ export const measurementRouter = createTRPCRouter({
         });
       }
 
-      console.log({ startOfCurrentMonth });
-      console.log({ endOfCurrentMonth });
-      console.log({ monthTemperatureData });
-
       return monthTemperatureData;
     }),
   // Vraća najnovija merenja
@@ -678,7 +674,6 @@ export const measurementRouter = createTRPCRouter({
       startOfSelectedMonth.setUTCDate(1);
       startOfSelectedMonth.setUTCHours(0, 0, 0, 0);
       const endOfSelectedMonth = endOfMonth(new Date(currentYear, monthIndex));
-      console.log({ startOfSelectedMonth });
       const energyAndAmbientTemperatureData: {
         energy: number;
         t_amb: number;
@@ -701,7 +696,6 @@ export const measurementRouter = createTRPCRouter({
           message: `Energy and ambient temperature data is missing for the month of ${month}.`,
         });
       }
-      console.log({ energyAndAmbientTemperatureData });
       return energyAndAmbientTemperatureData;
     }),
 });

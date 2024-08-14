@@ -117,7 +117,7 @@ export default function OverviewTemperatureDifference({
             {item.month.toLocaleLowerCase() === seriesData && (
               <Chart
                 dir="ltr"
-                type="line"
+                type="area"
                 series={item.data}
                 options={chartOptions}
                 width="100%"
