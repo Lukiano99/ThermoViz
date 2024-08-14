@@ -9,7 +9,11 @@ export type ActionMapType<M extends Record<string, unknown>> = {
       };
 };
 
-export type AuthUserType = null | Record<string, unknown>;
+export type AuthUserType = null | {
+  displayName?: string;
+  email?: string;
+  [x: string]: unknown;
+};
 
 export type AuthStateType = {
   status?: string;

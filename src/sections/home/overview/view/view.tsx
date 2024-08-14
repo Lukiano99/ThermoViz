@@ -1,10 +1,12 @@
 "use client";
-import { Container, Grid, Skeleton } from "@mui/material";
+import { useState } from "react";
+import { Container, Grid, Skeleton, Typography } from "@mui/material";
 
+import { useAuthContext } from "@/auth/hooks";
 import { useSettingsContext } from "@/components/settings";
+import AnalyticsEnergyTemperature from "@/sections/data-analysis/analytics/analytics-energy-temperature";
 import { api } from "@/trpc/react";
 
-import OverviewTemperatureDifference from "../overview-area-installed";
 import OverviewEnergyByLocation from "../overview-current-download";
 import OverviewEnergyConsumptionWidget from "../overview-energy-consumption-widget";
 import OverviewLocations from "../overview-locations";
@@ -13,7 +15,7 @@ import OverviewWidgetSummary from "../overview-widget-summary";
 
 export default function HomeOverviewView() {
   const settings = useSettingsContext();
-
+  const [chartMonth, setChartMonth] = useState("april");
   const { data: averageTemperatures, isLoading: isLoadingAverageTemperatures } =
     api.measurement.averageAmbientTemperature.useQuery({
       nDaysAgo: 5,
@@ -24,17 +26,33 @@ export default function HomeOverviewView() {
     isLoading: isLoadingByLocation,
   } = api.measurement.getTotalEnergyConsumptionByLocation.useQuery();
 
-  const { data: monthTemperatureData, isLoading: isLoadingMonthTemperature } =
-    api.measurement.getMonthTemperatureData.useQuery();
-
+  const {
+    data: energyAndTemperatureData,
+    isLoading: isLoadingEnergyAndTemperatureData,
+  } = api.measurement.getEnergyAndAmbientTemperatureData.useQuery({
+    month: chartMonth,
+  });
   const { data: recentMeasurements, isLoading: isLoadingRecent } =
     api.measurement.getRecent.useQuery();
 
   const { data: avgTempByLocation, isLoading: isLoadingAvgTempByLocation } =
     api.measurement.getAverageTemperatureByLocation.useQuery();
-  console.log({ avgTempByLocation });
+
+  const { user } = useAuthContext();
   return (
     <Container maxWidth={settings.themeStretch ? false : "xl"}>
+      {user?.displayName && (
+        <Typography
+          variant="h3"
+          sx={{
+            paddingBottom: 5,
+          }}
+        >
+          Welcome back,{" "}
+          {user.displayName !== "undefined" ? user.displayName : "User"} 👋
+        </Typography>
+      )}
+
       <Grid container spacing={3}>
         <Grid xs={12} md={4} item>
           <OverviewEnergyConsumptionWidget lastDays={7} UOM="MWh" />
@@ -64,7 +82,12 @@ export default function HomeOverviewView() {
 
         <Grid xs={12} md={6} lg={4} item>
           {isLoadingByLocation && (
-            <Skeleton sx={{ width: "100%", minHeight: "492px" }} />
+            <Skeleton
+              sx={{
+                width: "100%",
+                minHeight: "492px",
+              }}
+            />
           )}
           {!isLoadingByLocation && totalEnergyConsumptionByLocation && (
             <OverviewEnergyByLocation
@@ -79,38 +102,39 @@ export default function HomeOverviewView() {
             />
           )}
         </Grid>
-
-        <Grid xs={12} md={6} lg={8} item>
-          {isLoadingMonthTemperature && (
-            <Skeleton sx={{ width: "100%", height: "492px" }} />
+        <Grid xs={12} lg={8} item>
+          {isLoadingEnergyAndTemperatureData && (
+            <Skeleton
+              sx={{
+                width: "100%",
+                minHeight: "492px",
+              }}
+            />
           )}
-          {monthTemperatureData && (
-            <OverviewTemperatureDifference
-              title="Supply & Return in °C"
-              subheader="Temperature difference between primary supply and return in the primary circuit"
+          {energyAndTemperatureData && (
+            <AnalyticsEnergyTemperature
+              onMonthChange={(month) => setChartMonth(month)}
+              month={chartMonth}
+              title="Temperature vs Consumed Energy"
+              subheader="Graph of temperature dependence on consumed energy
+"
               chart={{
-                categories: monthTemperatureData.map((data) =>
-                  data.day.toLocaleDateString("en-US", { day: "2-digit" }),
+                categories: energyAndTemperatureData.map((data) =>
+                  data.energy.toString(),
                 ),
                 series: [
-                  ...new Set(monthTemperatureData.map((item) => item.month)),
-                ].map((month) => ({
-                  month: month,
-                  data: [
-                    {
-                      name: "Supply T  in the Primary Circuit",
-                      data: monthTemperatureData
-                        .filter((monthData) => monthData.month === month)
-                        .map((finalData) => finalData.average_t_sup_prim),
-                    },
-                    {
-                      name: "Return T  in the Primary Circuit",
-                      data: monthTemperatureData
-                        .filter((monthData) => monthData.month === month)
-                        .map((finalData) => finalData.average_t_ret_prim),
-                    },
-                  ],
-                })),
+                  {
+                    month: chartMonth,
+                    data: [
+                      {
+                        name: "t_amb",
+                        data: energyAndTemperatureData.map(
+                          (data) => data.t_amb,
+                        ),
+                      },
+                    ],
+                  },
+                ],
               }}
             />
           )}

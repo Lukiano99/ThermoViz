@@ -10,11 +10,15 @@ import Chart, { useChart } from "src/components/chart";
 import CustomPopover, { usePopover } from "src/components/custom-popover";
 import Iconify from "src/components/iconify";
 
+import { api } from "@/trpc/react";
+
 // ----------------------------------------------------------------------
 
 interface Props extends CardProps {
   title?: string;
   subheader?: string;
+  onMonthChange?: (month: string) => void;
+  month: string;
   chart: {
     categories?: string[];
     colors?: string[][];
@@ -33,10 +37,13 @@ export default function OverviewTemperatureDifference({
   title,
   subheader,
   chart,
+  onMonthChange,
+  month,
   ...other
 }: Props) {
   const theme = useTheme();
-
+  const { data: availableMonths, isLoading: isLoadingMonths } =
+    api.measurement.getDistinctMonths.useQuery();
   const {
     colors = [
       [theme.palette.primary.light, theme.palette.primary.main],
@@ -49,19 +56,11 @@ export default function OverviewTemperatureDifference({
 
   const popover = usePopover();
 
-  const [seriesData, setSeriesData] = useState("April");
+  const [seriesData, setSeriesData] = useState(month);
 
   const chartOptions = useChart({
     colors: colors.map((colr) => colr[1]),
-    fill: {
-      // type: "gradient",
-      // gradient: {
-      //   colorStops: colors.map((colr) => [
-      //     { offset: 0, color: colr[0], opacity: 1 },
-      //     { offset: 100, color: colr[1], opacity: 1 },
-      //   ]),
-      // },
-    },
+    fill: {},
     xaxis: {
       categories,
     },
@@ -72,8 +71,11 @@ export default function OverviewTemperatureDifference({
     (newValue: string) => {
       popover.onClose();
       setSeriesData(newValue);
+      if (onMonthChange) {
+        onMonthChange(newValue);
+      }
     },
-    [popover],
+    [popover, onMonthChange],
   );
 
   return (
@@ -94,7 +96,8 @@ export default function OverviewTemperatureDifference({
                 bgcolor: "background.neutral",
               }}
             >
-              {seriesData}
+              {seriesData?.[0]?.toString().toUpperCase()}
+              {seriesData?.toString().substring(1)}
 
               <Iconify
                 width={16}
@@ -111,10 +114,10 @@ export default function OverviewTemperatureDifference({
 
         {series.map((item) => (
           <Box key={item.month} sx={{ mt: 3, mx: 3 }}>
-            {item.month === seriesData && (
+            {item.month.toLocaleLowerCase() === seriesData && (
               <Chart
                 dir="ltr"
-                type="line"
+                type="area"
                 series={item.data}
                 options={chartOptions}
                 width="100%"
@@ -125,21 +128,24 @@ export default function OverviewTemperatureDifference({
         ))}
       </Card>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        sx={{ width: 140 }}
-      >
-        {series.map((option) => (
-          <MenuItem
-            key={option.month}
-            selected={option.month === seriesData}
-            onClick={() => handleChangeSeries(option.month)}
-          >
-            {option.month}
-          </MenuItem>
-        ))}
-      </CustomPopover>
+      {availableMonths && !isLoadingMonths && (
+        <CustomPopover
+          open={popover.open}
+          onClose={popover.onClose}
+          sx={{ width: 140 }}
+        >
+          {availableMonths.map((month) => (
+            <MenuItem
+              key={month}
+              selected={month === seriesData}
+              onClick={() => handleChangeSeries(month)}
+            >
+              {month[0]?.toUpperCase()}
+              {month.substring(1)}
+            </MenuItem>
+          ))}
+        </CustomPopover>
+      )}
     </>
   );
 }
