@@ -1,28 +1,27 @@
-import { Typography } from "@mui/material";
-import Box from "@mui/material/Box";
+import { Box, Typography } from "@mui/material";
 import Card, { type CardProps } from "@mui/material/Card";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import { useTheme } from "@mui/material/styles";
 import { type ApexOptions } from "apexcharts";
 import Chart, { useChart } from "src/components/chart";
-import { fData } from "src/utils/format-number";
 
 // ----------------------------------------------------------------------
 
 interface Props extends CardProps {
   total: number;
+  consumption: number;
   title: string;
-  currentTemperature: number;
-  averageTemperature: number;
-  totalDailyEnergy: number;
-  deltaT: number;
-  status: string;
+  latestMeasurementTime: string;
+  latestUpdateTime: string;
+
   data: {
     name: string;
-    usedStorage: number;
+    value: number;
     filesCount: number;
     icon: React.ReactNode;
+    UOM?: string;
+    description?: string;
   }[];
   chart: {
     colors?: string[];
@@ -32,8 +31,11 @@ interface Props extends CardProps {
 }
 
 export default function LocationOverview({
+  consumption,
   data,
   total,
+  latestMeasurementTime,
+  latestUpdateTime,
   chart,
   title,
   ...other
@@ -55,8 +57,8 @@ export default function LocationOverview({
     },
     grid: {
       padding: {
-        top: 24,
-        bottom: 24,
+        top: 10,
+        bottom: 10,
       },
     },
     legend: {
@@ -67,7 +69,7 @@ export default function LocationOverview({
         startAngle: -90,
         endAngle: 90,
         hollow: {
-          size: "56%",
+          size: "60%",
         },
         dataLabels: {
           name: {
@@ -78,7 +80,7 @@ export default function LocationOverview({
           },
           total: {
             // label: `Used of ${fData(total)} / 50GB`,
-            label: `${fData(total)}/50GB`,
+            label: `${consumption} / ${total.toFixed(2)} KWh`,
             color: theme.palette.text.disabled,
             fontSize: theme.typography.body2.fontSize as string,
             fontWeight: theme.typography.body2.fontWeight,
@@ -87,13 +89,13 @@ export default function LocationOverview({
       },
     },
     fill: {
-      // type: "gradient",
-      // gradient: {
-      //   colorStops: [
-      //     { offset: 0, color: colors[0] ?? "green", opacity: 1 },
-      //     { offset: 100, color: colors[1] ?? "green", opacity: 1 },
-      //   ],
-      // },
+      type: "gradient",
+      gradient: {
+        colorStops: [
+          { offset: 0, color: colors[0] ?? "green", opacity: 1 },
+          { offset: 100, color: colors[1] ?? "green", opacity: 1 },
+        ],
+      },
     },
     ...options,
   });
@@ -116,6 +118,56 @@ export default function LocationOverview({
       >
         {title}
       </Typography>
+      <Stack
+        sx={{
+          justifyContent: "space-between",
+          display: "flex",
+          flexDirection: "row",
+          width: "70%",
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{
+            pt: 1,
+          }}
+        >
+          Last measurement time:
+        </Typography>
+        <Typography
+          variant="caption"
+          sx={{
+            pt: 1,
+          }}
+        >
+          <strong>{latestMeasurementTime}</strong>
+        </Typography>
+      </Stack>
+      <Stack
+        sx={{
+          justifyContent: "space-between",
+          display: "flex",
+          flexDirection: "row",
+          width: "70%",
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{
+            pt: 1,
+          }}
+        >
+          Fetched:
+        </Typography>
+        <Typography
+          variant="caption"
+          sx={{
+            pt: 1,
+          }}
+        >
+          <strong>{latestUpdateTime}</strong>
+        </Typography>
+      </Stack>
 
       <Chart
         dir="ltr"
@@ -132,7 +184,7 @@ export default function LocationOverview({
             key={category.name}
             spacing={2}
             direction="row"
-            alignItems="center"
+            alignItems="start"
           >
             <Box
               sx={{
@@ -149,7 +201,10 @@ export default function LocationOverview({
 
             <ListItemText
               primary={category.name}
-              secondary={`${category.filesCount} files`}
+              secondary={`${category.description}`}
+              primaryTypographyProps={{
+                typography: "subtitle2",
+              }}
               secondaryTypographyProps={{
                 mt: 0.5,
                 component: "span",
@@ -158,9 +213,16 @@ export default function LocationOverview({
               }}
             />
 
-            <Box sx={{ typography: "subtitle2" }}>
-              {" "}
-              {fData(category.usedStorage)}{" "}
+            <Box
+              sx={{
+                typography: "subtitle2",
+                ml: 2,
+                width: 1 / 3,
+                display: "flex",
+                justifyContent: "end",
+              }}
+            >
+              {`${category.value} ${category.UOM ?? ""}`}
             </Box>
           </Stack>
         ))}

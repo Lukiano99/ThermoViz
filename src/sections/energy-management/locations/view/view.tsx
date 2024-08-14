@@ -1,10 +1,12 @@
 "use client";
 
-import { Box, Grid, Typography } from "@mui/material";
+import { Grid, Skeleton } from "@mui/material";
+import { blue, green } from "@mui/material/colors";
 import Container from "@mui/material/Container";
 import { useSettingsContext } from "src/components/settings";
 
 import SvgColor from "@/components/svg-color";
+import { api } from "@/trpc/react";
 
 import LocationOverview from "../location-overview";
 
@@ -30,65 +32,105 @@ const ICONS = {
 };
 export default function LocationsView() {
   const settings = useSettingsContext();
-  const GB = 1000000000 * 24;
+
+  const { data: locationsStats, isLoading } =
+    api.locations.getLocationStats.useQuery();
+
+  const sumEnergy = locationsStats
+    ?.map((loc) => loc.totalDailyEnergy)
+    .reduce((acc, energy) => acc + energy, 0);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : "xl"}>
-      <Typography variant="h3">Hello, user</Typography>
-      <Grid container spacing={3}>
-        <Grid item>
-          <LocationOverview
-            title="L22"
-            currentTemperature={22}
-            averageTemperature={21}
-            totalDailyEnergy={1024}
-            deltaT={4}
-            status={"normal"}
-            total={GB}
-            chart={{
-              series: 76,
-            }}
-            data={[
-              {
-                name: "Current Ambient Temperature",
-                usedStorage: GB / 2,
-                filesCount: 223,
-                icon: ICONS.celsius,
-              },
-              {
-                name: "Average Daily Temperature",
-                usedStorage: GB / 5,
-                filesCount: 223,
-                icon: ICONS.thermo,
-              },
-              {
-                name: "Total Daily Energy Consumption",
-                usedStorage: GB / 5,
-                filesCount: 223,
-                icon: ICONS.energy,
-              },
-              {
-                name: "Temperature Difference (Delta T)",
-                usedStorage: GB / 10,
-                filesCount: 223,
-                icon: ICONS.deltaT,
-              },
-              {
-                name: "System Status",
-                usedStorage: GB / 10,
-                filesCount: 223,
-                icon: ICONS.system,
-              },
-              {
-                name: "Last Update Time",
-                usedStorage: GB / 10,
-                filesCount: 223,
-                icon: ICONS.clock,
-              },
-            ]}
-          />
+      {/* <Typography variant="h3">Hello, user</Typography> */}
+
+      {!locationsStats && isLoading && (
+        <Grid container spacing={3}>
+          {Array(5)
+            .fill(null)
+            .map((_, idx) => (
+              <Grid xs={12} md={4} item key={idx}>
+                <Skeleton
+                  sx={{
+                    width: 1,
+                    height: "650px",
+                  }}
+                />
+              </Grid>
+            ))}
         </Grid>
-      </Grid>
+      )}
+
+      {locationsStats && sumEnergy && !isLoading && (
+        <Grid container spacing={3}>
+          {locationsStats.map((loc, idx) => {
+            const consumptionShare = Number(
+              ((loc.totalDailyEnergy / sumEnergy) * 100).toFixed(2),
+            );
+
+            return (
+              <Grid xs={12} md={4} item key={idx}>
+                <LocationOverview
+                  title={loc.location}
+                  total={sumEnergy}
+                  consumption={loc.totalDailyEnergy}
+                  latestMeasurementTime={loc.latestMeasurementTime}
+                  latestUpdateTime={loc.fetchingTime}
+                  chart={{
+                    series: consumptionShare,
+                    colors:
+                      idx % 2 === 0
+                        ? [green[500], green[700]]
+                        : [blue[500], blue[700]],
+                  }}
+                  data={[
+                    {
+                      name: "Current Ambient Temperature",
+                      value: loc.currentTemp,
+                      filesCount: 223,
+                      icon: ICONS.celsius,
+                      description: "Temperature at this moment",
+                      UOM: "°C",
+                    },
+                    {
+                      name: "Average Daily Temperature",
+                      value: loc.avgDailyTemp,
+                      filesCount: 223,
+                      icon: ICONS.thermo,
+                      description: loc.avgDailyTemp.toString(),
+                      UOM: "°C",
+                    },
+                    {
+                      name: "Temperature Difference",
+                      value: loc.tempDifference,
+                      filesCount: 223,
+                      icon: ICONS.deltaT,
+                      description: "t_prim_sup & t_prim_ret",
+                      UOM: "°C",
+                    },
+                    {
+                      name: "Daily Energy Consumption",
+                      value: loc.totalDailyEnergy,
+                      filesCount: 223,
+                      icon: ICONS.energy,
+                      description: "Energy sum of every measurement record",
+                      UOM: "KWh",
+                    },
+                    {
+                      name: "System Status",
+                      // value: loc.systemStatus,
+                      value: 5,
+                      filesCount: 223,
+                      icon: ICONS.system,
+                      description: "Shows how system works",
+                    },
+                  ]}
+                />
+              </Grid>
+            );
+          })}
+        </Grid>
+      )}
     </Container>
   );
 }
