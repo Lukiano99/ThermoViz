@@ -28,7 +28,7 @@ const StyledChart = styled(Chart)(({ theme }) => ({
 interface Props extends CardProps {
   title?: string;
   subheader?: string;
-  total: number;
+  averageTemp: number;
   chart: {
     colors?: string[][];
     series: {
@@ -42,7 +42,7 @@ interface Props extends CardProps {
 export default function AnalyticsTempPerLocation({
   title,
   subheader,
-  total,
+  averageTemp,
   chart,
   ...other
 }: Props) {
@@ -56,7 +56,7 @@ export default function AnalyticsTempPerLocation({
     colors,
     chart: {
       sparkline: {
-        enabled: true,
+        enabled: false,
       },
     },
     labels: series.map((i) => i.label),
@@ -71,7 +71,8 @@ export default function AnalyticsTempPerLocation({
         dataLabels: {
           value: { offsetY: 16 },
           total: {
-            formatter: () => fNumber(total),
+            formatter: () => fNumber(averageTemp) + " °C",
+            label: "Avg Temp",
           },
         },
       },

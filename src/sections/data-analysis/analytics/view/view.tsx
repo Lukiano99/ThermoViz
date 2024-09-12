@@ -108,7 +108,7 @@ export default function AnalyticsView() {
           {avgLocationsTemps && !isLoadingAvgLocTemps && (
             <AnalyticsTempPerLocation
               title="Average Temperature by Location"
-              total={2324}
+              averageTemp={19.4}
               chart={{
                 // series: [
                 //   { label: "Mens", value: 44 },

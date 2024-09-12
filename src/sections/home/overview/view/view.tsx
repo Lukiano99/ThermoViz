@@ -116,8 +116,7 @@ export default function HomeOverviewView() {
               onMonthChange={(month) => setChartMonth(month)}
               month={chartMonth}
               title="Temperature vs Consumed Energy"
-              subheader="Graph of temperature dependence on consumed energy
-"
+              subheader="Graph of temperature dependence on consumed energy"
               chart={{
                 categories: energyAndTemperatureData.map((data) =>
                   data.energy.toString(),
