@@ -1,29 +1,72 @@
-# Create T3 App
+# Next.js tRPC App
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+This application is built using **Next.js**, **tRPC**, **Prisma**, **Supabase** for authentication, **Material UI (MUI)** components, and **ApexCharts** for rendering charts. The project uses **pnpm**, but can also be run with **npm**, **bun**, or **yarn**.
 
-## What's next? How do I make an app with this?
+---
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+Ova aplikacija je izgrađena korišćenjem **Next.js**, **tRPC**, **Prisma**, **Supabase** za autentifikaciju, **Material UI (MUI)** komponenti, i **ApexCharts** za grafike. Projekat koristi **pnpm**, ali se može koristiti i sa **npm**, **bun** ili **yarn**.
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## How to Run the Project / Kako Pokrenuti Projekat
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+1. Clone the repository / Klonirajte repozitorijum:
+    ```bash
+    git clone <repo-url>
+    ```
 
-## Learn More
+2. Install dependencies using **pnpm** (or `npm`, `yarn`, `bun`) / Instalirajte zavisnosti koristeći **pnpm** (ili `npm`, `yarn`, `bun`):
+    ```bash
+    pnpm install
+    ```
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+3. Configure the **.env** file / Konfigurišite **.env** fajl:
+    - Add **API** keys for **Supabase** database and authentication / Dodajte **API** ključeve za **Supabase** bazu i autentifikaciju.
+    - Example environment variables can be found in the `.env.example` file / Primer varijabli možete pronaći u fajlu `.env.example`.
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+4. Generate Prisma types / Generišite Prisma tipove:
+    ```bash
+    npx prisma generate
+    ```
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+5. Start the development server / Pokrenite razvojni server:
+    ```bash
+    pnpm dev
+    ```
 
-## How do I deploy this?
+## Technologies / Tehnologije
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+- **Next.js**: Server-side rendering and static site generator / Server-side rendering i statički sajt generator.
+- **tRPC**: End-to-end type-safe API communication / End-to-end tip-safe API komunikacija.
+- **Prisma**: ORM for database interaction / ORM za interakciju sa bazom podataka.
+- **Supabase**: Database and authentication / Baza podataka i autentifikacija.
+- **Material UI (MUI)**: UI components / Komponente za korisnički interfejs.
+- **ApexCharts**: Library for interactive charts / Biblioteka za iscrtavanje interaktivnih grafika.
+
+## Project Structure / Struktura Projekta
+
+- `src/app/dashboard`: Main part of the application, dashboard functionalities / Glavni deo aplikacije, dashboard funkcionalnosti.
+- `src/server`: Server-side logic and tRPC routers / Server-side logika i tRPC router-i.
+- `src/prisma`: Prisma schema for defining models / Prisma schema za definisanje modela.
+
+## Important Notes / Važne Napomene
+
+- **Prisma** types must be generated using the following command / **Prisma** tipove je potrebno generisati pomoću sledeće komande:
+    ```bash
+    npx prisma generate
+    ```
+
+- Add **Supabase** API keys in the `.env` file to enable authentication and database / Postavite **Supabase** API ključeve u `.env` fajl kako biste omogućili autentifikaciju i bazu podataka.
+
+## References / Reference
+
+- [Next.js Documentation](https://nextjs.org/docs) / [Next.js Dokumentacija](https://nextjs.org/docs)
+- [tRPC Documentation](https://trpc.io/docs) / [tRPC Dokumentacija](https://trpc.io/docs)
+- [T3 Stack Documentation](https://create.t3.gg/) / [T3 Stack Dokumentacija](https://create.t3.gg/)
+- [Supabase Documentation](https://supabase.com/docs) / [Supabase Dokumentacija](https://supabase.com/docs)
+- [Prisma Documentation](https://www.prisma.io/docs) / [Prisma Dokumentacija](https://www.prisma.io/docs)
+- [Material UI Documentation](https://mui.com/) / [Material UI Dokumentacija](https://mui.com/)
+- [ApexCharts Documentation](https://apexcharts.com/docs) / [ApexCharts Dokumentacija](https://apexcharts.com/docs)
+
+## Requirements / Zahtevi
+
+- Node.js 14.x or higher / Node.js 14.x ili noviji.
+- API keys for Supabase / API ključevi za Supabase.
