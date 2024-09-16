@@ -2,15 +2,19 @@
 
 This application is built using **Next.js**, **tRPC**, **Prisma**, **Supabase** for authentication, **Material UI (MUI)** components, and **ApexCharts** for rendering charts. The project uses **pnpm**, but can also be run with **npm**, **bun**, or **yarn**.
 
+Repository URL: [https://github.com/Lukiano99/ThermoViz.git](https://github.com/Lukiano99/ThermoViz.git)
+
 ---
 
 Ova aplikacija je izgrađena korišćenjem **Next.js**, **tRPC**, **Prisma**, **Supabase** za autentifikaciju, **Material UI (MUI)** komponenti, i **ApexCharts** za grafike. Projekat koristi **pnpm**, ali se može koristiti i sa **npm**, **bun** ili **yarn**.
+
+URL repozitorijuma: [https://github.com/Lukiano99/ThermoViz.git](https://github.com/Lukiano99/ThermoViz.git)
 
 ## How to Run the Project / Kako Pokrenuti Projekat
 
 1. Clone the repository / Klonirajte repozitorijum:
     ```bash
-    git clone <repo-url>
+    git clone https://github.com/Lukiano99/ThermoViz.git
     ```
 
 2. Install dependencies using **pnpm** (or `npm`, `yarn`, `bun`) / Instalirajte zavisnosti koristeći **pnpm** (ili `npm`, `yarn`, `bun`):
